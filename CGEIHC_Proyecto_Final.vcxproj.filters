@@ -19,6 +19,9 @@
     <Filter Include="Archivos de origen\ImGui">
       <UniqueIdentifier>{45a3b7f1-a34f-4438-848d-85006433ef7e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Archivos de encabezado\Assimp">
+      <UniqueIdentifier>{3902a9ec-bd88-4524-98cb-d679f5300fea}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="include\imgui\imgui_widgets.cpp">
@@ -55,7 +58,19 @@
       <Filter>Archivos de origen</Filter>
     </ClCompile>
     <ClCompile Include="imfilebrowser.h">
-      <Filter>Archivos de encabezado</Filter>
+      <Filter>Archivos de encabezado\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="GameObject.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="Texture.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="Animation.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="Animator.cpp">
+      <Filter>Archivos de origen</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -86,9 +101,6 @@
     <ClInclude Include="include\imgui\imstb_truetype.h">
       <Filter>Archivos de encabezado\ImGui</Filter>
     </ClInclude>
-    <ClInclude Include="AssimpGLMHelpers.h">
-      <Filter>Archivos de encabezado</Filter>
-    </ClInclude>
     <ClInclude Include="Window.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
@@ -96,6 +108,24 @@
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
     <ClInclude Include="Mesh.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="AssimpGLMHelpers.h">
+      <Filter>Archivos de encabezado\Assimp</Filter>
+    </ClInclude>
+    <ClInclude Include="GameObject.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="Raycast.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="Animator.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
   </ItemGroup>

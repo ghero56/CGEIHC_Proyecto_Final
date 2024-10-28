@@ -20,7 +20,7 @@ public:
 	Window();
 	~Window();
 
-	int Initialize();
+	int Initialize(int,int);
 	void SwapBuffers() { glfwSwapBuffers(selfWindow); }
 	void PollEvents() { glfwPollEvents(); }
 	bool ShouldClose() { return glfwWindowShouldClose(selfWindow); }

@@ -146,7 +146,10 @@ xcopy /y /d "lib\assimp\*.dll" "$(OutDir)"
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Animation.cpp" />
+    <ClCompile Include="Animator.cpp" />
     <ClCompile Include="COMMODO_VALUES.h" />
+    <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="imfilebrowser.h" />
     <ClCompile Include="include\imgui\backends\imgui_impl_glfw.cpp" />
     <ClCompile Include="include\imgui\backends\imgui_impl_opengl3.cpp" />
@@ -157,10 +160,14 @@ xcopy /y /d "lib\assimp\*.dll" "$(OutDir)"
     <ClCompile Include="include\imgui\imgui_widgets.cpp" />
     <ClCompile Include="main_test_bones.cpp" />
     <ClCompile Include="Mesh.cpp" />
+    <ClCompile Include="Texture.cpp" />
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Animation.h" />
+    <ClInclude Include="Animator.h" />
     <ClInclude Include="AssimpGLMHelpers.h" />
+    <ClInclude Include="GameObject.h" />
     <ClInclude Include="GLSL_ShaderCompiler.h" />
     <ClInclude Include="include\imgui\backends\imgui_impl_glfw.h" />
     <ClInclude Include="include\imgui\backends\imgui_impl_opengl3.h" />
@@ -172,6 +179,8 @@ xcopy /y /d "lib\assimp\*.dll" "$(OutDir)"
     <ClInclude Include="include\imgui\imstb_textedit.h" />
     <ClInclude Include="include\imgui\imstb_truetype.h" />
     <ClInclude Include="Mesh.h" />
+    <ClInclude Include="Raycast.h" />
+    <ClInclude Include="Texture.h" />
     <ClInclude Include="Window.h" />
   </ItemGroup>
   <ItemGroup>

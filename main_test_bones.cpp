@@ -104,8 +104,23 @@ void EndOfFrame(GLFWwindow* wind)
 	glfwSwapBuffers(wind);
 }
 
+void ExitCleanup()
+{
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
+
+	//glDeleteFramebuffers(1, &FBO);
+	//glDeleteTextures(1, &texture_id);
+	//glDeleteRenderbuffers(1, &RBO);
+
+	glfwDestroyWindow(window.selfWindow);
+	glfwTerminate();
+}
+
 int main(void)
 {
+	// FMOD initialization
 	FMOD_RESULT result;
 	FMOD::System* system = nullptr;
 
@@ -118,19 +133,58 @@ int main(void)
 	FMOD::Channel* channel = nullptr;
 	result = system->playSound(sound, nullptr, false, &channel);
 
-    /* Initialize the library */
+	// GLFW initialization
 	window = Window();
-    window.Initialize();
+    window.Initialize(1920, 1080);
+	
+	// ImGui input output
     ImGuiIO& imgui_io = ImGui::GetIO(); (void)imgui_io;
+	imgui_io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 
 	/*Also testing*/
-	LoadShader("Assets/Shaders/VertexShader.glsl", GL_VERTEX_SHADER);
-	LoadShader("Assets/Shaders/FragmentShader.glsl", GL_FRAGMENT_SHADER);
+	// shaders compilation
+	GLuint vertexShader = LoadShader("Assets/Shaders/VertexShader.glsl", GL_VERTEX_SHADER);
+	GLuint fragmentShader = LoadShader("Assets/Shaders/FragmentShader.glsl", GL_FRAGMENT_SHADER);
+
+	GLuint shaderProgram = glCreateProgram();
+	glAttachShader(shaderProgram, vertexShader);
+	glAttachShader(shaderProgram, fragmentShader);
+	glLinkProgram(shaderProgram);
+
+	// uniform initialization
+	// Usar el programa de shaders antes de setear uniformes
+	glUseProgram(shaderProgram);
+
+	// Inicialización de uniforms
+	GLuint modelLoc = glGetUniformLocation(shaderProgram, "model");
+	GLuint viewLoc = glGetUniformLocation(shaderProgram, "view");
+	GLuint projectionLoc = glGetUniformLocation(shaderProgram, "projection");
+	GLuint lightSpaceMatrixLoc = glGetUniformLocation(shaderProgram, "lightSpaceMatrix");
+	GLuint boneTransformsLoc = glGetUniformLocation(shaderProgram, "boneTransforms");
+	GLuint colorLoc = glGetUniformLocation(shaderProgram, "color");
+	GLuint toffsetLoc = glGetUniformLocation(shaderProgram, "toffset");
+
+	glm::mat4 model = glm::mat4(1.0f);
+	glm::mat4 view = glm::mat4(1.0f);
+	glm::mat4 projection = glm::perspective(45.0f, (GLfloat)window.getBufferWidth() / window.getBufferHeight(), 0.1f, 1000.0f);
+	glm::mat4 lightSpaceMatrix = glm::mat4(1.0f);
+
+	// Verifica el programa
+	GLint success;
+	GLchar infoLog[512];
+	glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
+	if (!success) {
+		glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
+		printf("Error al enlazar el programa de shaders: %s\n", infoLog);
+	}
+
+	// eliminar los shaders ahora que están vinculados al programa
+	glDeleteShader(vertexShader);
+	glDeleteShader(fragmentShader);
 
 	// assimp
 	Assimp::Importer importer;
 	const aiScene* scene = importer.ReadFile("Assets/Models/aurora.glb", ASSIMP_LOAD_FLAGS);
-	parse_scene(scene);
 
 	GLuint	uniformProjection = 0,
 			uniformModel = 0,
@@ -140,7 +194,6 @@ int main(void)
 			uniformShininess = 0,
 			uniformTextureOffset = 0,
 			uniformColor = 0;
-	glm::mat4 projection = glm::perspective(45.0f, (GLfloat)window.getBufferWidth() / window.getBufferHeight(), 0.1f, 1000.0f);
 
 	// imgui
 	ImGui::FileBrowser fileDialog;
@@ -159,7 +212,6 @@ int main(void)
 		
 		// mi código en loop
 		
-
 
 		ImGui::Begin("Titulo impresionante");
 		ImGui::Text("Some useful text.");
@@ -205,10 +257,7 @@ int main(void)
 		EndOfFrame(window.selfWindow);
     }
 
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplGlfw_Shutdown();
-    ImGui::DestroyContext();
+	ExitCleanup();
 
-    glfwTerminate();
     return 0;
 }
