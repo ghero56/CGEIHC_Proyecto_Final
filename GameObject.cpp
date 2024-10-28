@@ -2,6 +2,7 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include <glm/gtc/quaternion.hpp> // Incluir las funciones de cuaterniones
 #include <algorithm>
+#include "include\stb\stb_image.h"
 
 GameObject::GameObject() :
     mesh(nullptr), selected(false), showGizmos(false), showBoundingBox(false),

@@ -1,6 +1,5 @@
 #include "Texture.h"
-#include "include/stb/stb_image.h"
-#include <iostream>
+#include "include\stb\stb_image.h"
 
 Texture::Texture(const std::string& filePath) {
     this->filePath = filePath;

@@ -14,9 +14,8 @@
 #include "assimp/Importer.hpp"
 #include "assimp/scene.h"
 #include "assimp/postprocess.h"
-#define STB_IMAGE_IMPLEMENTATION
-#include "include/stb/stb_image.h"
 #include "Texture.h"
+#include "include\stb\stb_image.h"
 #include "Animation.h"
 #include "Animator.h"
 

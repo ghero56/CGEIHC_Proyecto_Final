@@ -2,6 +2,8 @@
 
 #include <glew.h>
 #include <string>
+#include <iostream>
+#include "include\stb\stb_image.h"
 
 class Texture {
 public:

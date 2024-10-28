@@ -30,52 +30,6 @@
 
 using namespace std;
 
-void parse_single_bone(int bone_i, const aiBone* bone)
-{
-	for (int i = 0; i < bone->mNumWeights; i++)
-	{
-		aiVertexWeight weight = bone->mWeights[i];
-		cout << "Bone " << bone_i << " has weight " << weight.mWeight << " on vertex " << weight.mVertexId << endl;
-	}
-}
-
-void parse_mesh_bones(const aiMesh* pMesh) {
-	for (int i = 0; i < pMesh->mNumBones; i++)
-	{
-		parse_single_bone(i, pMesh->mBones[i]);
-	}
-}
-
-void parse_meshes(const aiScene* scene)
-{
-	cout << "Parsing meshes" << endl;
-
-	int total_vertices = 0;
-	int total_indices = 0;
-	int total_bones = 0;
-
-	for (int i = 0; i < scene->mNumMeshes; i++)
-	{
-		const aiMesh* mesh = scene->mMeshes[i];
-		int num_vertices = mesh->mNumVertices;
-		int num_indices = mesh->mNumFaces * 3;
-		int num_bones = mesh->mNumBones;
-		cout << "Mesh " << i << " has " << num_vertices << " vertices and " << num_indices << " indices" << endl;
-		total_vertices += num_vertices;
-		total_indices += num_indices;
-		total_bones += num_bones;
-		if (mesh->HasBones())
-			parse_mesh_bones(mesh);
-	}
-}
-
-void parse_scene(const aiScene* scene)
-{
-	parse_meshes(scene);
-}
-
-// fin testing
-
 Window window;
 // vector<Shader> shaders;
 

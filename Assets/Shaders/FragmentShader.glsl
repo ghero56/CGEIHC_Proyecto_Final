@@ -1,4 +1,4 @@
-#version 460
+#version 460 core
 
 in vec4 vCol;
 in vec2 TexCoord;
@@ -49,6 +49,7 @@ uniform SpotLight spotLights[MAX_SPOT_LIGHTS];
 uniform sampler2D theTexture;
 uniform Material material;
 uniform vec3 eyePosition;
+uniform sampler2D shadowMap; // Shadow map
 
 vec4 CalcLightByDirection(Light light, vec3 direction) {
     vec4 ambientcolor = vec4(light.color, 1.0f) * light.ambientIntensity;

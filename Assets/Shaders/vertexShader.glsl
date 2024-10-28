@@ -1,4 +1,5 @@
 #version 460 core
+
 layout (location = 0) in vec3 pos;
 layout (location = 1) in vec2 tex;
 layout (location = 2) in vec3 norm;
@@ -10,10 +11,12 @@ out vec2 TexCoord;
 out vec3 Normal;
 out vec3 FragPos;
 out vec4 vColor;
+out vec4 FragPosLightSpace; // Para las sombras
 
 uniform mat4 model;
 uniform mat4 projection;
 uniform mat4 view;
+uniform mat4 lightSpaceMatrix; // Matriz para la proyección desde la luz
 uniform vec3 color;
 uniform vec2 toffset;
 
@@ -28,6 +31,8 @@ void main() {
 
     vec4 transformedPos = boneTransform * vec4(pos, 1.0);
     gl_Position = projection * view * model * transformedPos;
+
+    FragPosLightSpace = lightSpaceMatrix * model * transformedPos; // Para las sombras
 
     vCol = vec4(0.0, 1.0, 0.0, 1.0f);
     vColor = vec4(color, 1.0f);
