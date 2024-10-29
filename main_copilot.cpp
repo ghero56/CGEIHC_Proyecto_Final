@@ -25,10 +25,12 @@
 
 using namespace std;
 
+vector<Mesh*> meshList;
+
 Window window;
 
 void NewFrame() {
-    glClearColor(0.5f, 0.1f, 0.1f, 1.0f);
+    glClearColor(0.f, .5f, 1.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glfwPollEvents();
     ImGui_ImplOpenGL3_NewFrame();
@@ -50,6 +52,74 @@ void ExitCleanup() {
     glfwTerminate();
 }
 
+void EditorTools(bool* demoWindow, ImGui::FileBrowser* fileDialog) { 
+    ImGui::Begin("Bool para el editor");
+    ImGui::Text("Este boton activa la demo, por defecto viene en True");
+    ImGui::Checkbox("Demo Window", demoWindow);
+    ImGui::End();
+
+    if (*demoWindow) {
+        ImGui::ShowDemoWindow();
+    }
+
+    if (ImGui::Begin("Project Explorer")) {
+        if (ImGui::Button("open file dialog"))
+            fileDialog->Open();
+    }
+    ImGui::End();
+
+    fileDialog->Display();
+
+    // handle de los archivos
+    if (fileDialog->HasSelected()) {
+        cout << "Selected filename" << fileDialog->GetSelected().string() << std::endl;
+        fileDialog->ClearSelected();
+    }
+}
+
+void CreateObjects()
+{
+    unsigned int indices[] = {
+        0, 3, 1,
+        1, 3, 2,
+        2, 3, 0,
+        0, 1, 2
+    };
+
+    GLfloat vertices[] = {
+        //	x      y      z			u	  v			nx	  ny    nz
+            -1.0f, -1.0f, -0.6f,	0.0f, 0.0f,		0.0f, 0.0f, 0.0f,
+            0.0f, -1.0f, 1.0f,		0.5f, 0.0f,		0.0f, 0.0f, 0.0f,
+            1.0f, -1.0f, -0.6f,		1.0f, 0.0f,		0.0f, 0.0f, 0.0f,
+            0.0f, 1.0f, 0.0f,		0.5f, 1.0f,		0.0f, 0.0f, 0.0f
+    };
+
+    unsigned int floorIndices[] = {
+        0, 2, 1,
+        1, 2, 3
+    };
+
+    GLfloat floorVertices[] = {
+        -10.0f, 0.0f, -10.0f,	0.0f, 0.0f,		0.0f, -1.0f, 0.0f,
+        10.0f, 0.0f, -10.0f,	10.0f, 0.0f,	0.0f, -1.0f, 0.0f,
+        -10.0f, 0.0f, 10.0f,	0.0f, 10.0f,	0.0f, -1.0f, 0.0f,
+        10.0f, 0.0f, 10.0f,		10.0f, 10.0f,	0.0f, -1.0f, 0.0f
+    };
+
+
+    Mesh* obj1 = new Mesh();
+    obj1->CreateMesh(vertices, indices, 32, 12);
+    meshList.push_back(obj1);
+
+    Mesh* obj2 = new Mesh();
+    obj2->CreateMesh(vertices, indices, 32, 12);
+    meshList.push_back(obj2);
+
+    Mesh* obj3 = new Mesh();
+    obj3->CreateMesh(floorVertices, floorIndices, 32, 6);
+    meshList.push_back(obj3);
+}
+
 int main(void) {
     // FMOD initialization
     FMOD_RESULT result;
@@ -63,7 +133,7 @@ int main(void) {
 
     // GLFW initialization
     window = Window();
-    window.Initialize(1920, 1080);
+    window.Initialize(720, 720);
 
     // ImGui initialization
     ImGuiIO& imgui_io = ImGui::GetIO();
@@ -87,8 +157,8 @@ int main(void) {
     }
 
     // Eliminar los shaders ahora que están vinculados al programa
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
+    //glDeleteShader(vertexShader);
+    //glDeleteShader(fragmentShader);
 
     // Usar el programa de shaders antes de setear uniformes
     glUseProgram(shaderProgram);
@@ -114,40 +184,28 @@ int main(void) {
     glUniformMatrix4fv(lightSpaceMatrixLoc, 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix));
 
     // Crear y configurar el GameObject
-    GameObject aurora;
-    aurora.CreateMesh("Assets/Models/aurora.glb");
+    GameObject* aurora = new GameObject();
+    // aurora->CreateMesh("Assets/Models/aurora.glb");
+    // aurora->CreateMesh();
+    
+    
     //aurora.SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
     //aurora.SetScale(glm::vec3(1.0f, 1.0f, 1.0f));
 
     ImGui::FileBrowser fileDialog;
+    bool demoWindow = true;
+    bool EditorMode = true;
 
-    bool demoWindow;
     while (!glfwWindowShouldClose(window.selfWindow)) {
+        
         NewFrame();
 
-        ImGui::Begin("Titulo impresionante");
-        ImGui::Text("Some useful text.");
-        ImGui::Checkbox("Demo Window", &demoWindow);
-        ImGui::End();
-
-        if (demoWindow)
-            ImGui::ShowDemoWindow();
-
-        if (ImGui::Begin("Project Explorer")) {
-            if (ImGui::Button("open file dialog"))
-                fileDialog.Open();
-        }
-        ImGui::End();
-        fileDialog.Display();
-
-        if (fileDialog.HasSelected()) {
-            std::cout << "Selected filename" << fileDialog.GetSelected().string() << std::endl;
-            fileDialog.ClearSelected();
-        }
+        if (EditorMode)     
+            EditorTools(&demoWindow, &fileDialog);
 
         // Renderización del GameObject
-        glUseProgram(shaderProgram); // Asegúrate de usar el programa de shaders antes de renderizar
-        aurora.Render();
+        glUseProgram(shaderProgram);
+        meshList[0]->RenderMesh();
 
         EndOfFrame(window.selfWindow);
     }

@@ -15,7 +15,7 @@
 #include "assimp/scene.h"
 #include "assimp/postprocess.h"
 #include "Texture.h"
-#include "include\stb\stb_image.h"
+#include "include/stb/stb_image.h"
 #include "Animation.h"
 #include "Animator.h"
 

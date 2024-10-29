@@ -34,7 +34,7 @@ int Window::Initialize(int rx, int ry) {
 		return 1;
 	}
 	//Obtener tamaño de Buffer
-	// glfwGetFramebufferSize(selfWindow, &bufferWidth, &bufferHeight);
+	glfwGetFramebufferSize(selfWindow, &bufferWidth, &bufferHeight);
 
 	//asignar el contexto
 	glfwMakeContextCurrent(selfWindow);

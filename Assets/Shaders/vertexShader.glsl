@@ -11,7 +11,7 @@ out vec2 TexCoord;
 out vec3 Normal;
 out vec3 FragPos;
 out vec4 vColor;
-out vec4 FragPosLightSpace; // Para las sombras
+// out vec4 FragPosLightSpace; // Para las sombras
 
 uniform mat4 model;
 uniform mat4 projection;
@@ -24,19 +24,21 @@ const int MAX_BONES = 100;
 uniform mat4 boneTransforms[MAX_BONES];
 
 void main() {
+/*
     mat4 boneTransform = boneTransforms[boneIDs[0]] * weights[0] +
                          boneTransforms[boneIDs[1]] * weights[1] +
                          boneTransforms[boneIDs[2]] * weights[2] +
                          boneTransforms[boneIDs[3]] * weights[3];
+                        */
+    // vec4 transformedPos = boneTransform * vec4(pos, 1.0);
+    gl_Position = projection * view * model * vec4(pos, 1.0); // * transformedPos;
 
-    vec4 transformedPos = boneTransform * vec4(pos, 1.0);
-    gl_Position = projection * view * model * transformedPos;
-
-    FragPosLightSpace = lightSpaceMatrix * model * transformedPos; // Para las sombras
+    // FragPosLightSpace = lightSpaceMatrix * model * vec4(pos, 1.0); // * transformedPos; // Para las sombras
 
     vCol = vec4(0.0, 1.0, 0.0, 1.0f);
     vColor = vec4(color, 1.0f);
     TexCoord = tex + toffset;
     Normal = mat3(transpose(inverse(model))) * norm;
-    FragPos = (model * transformedPos).xyz;
+    // FragPos = (model * transformedPos).xyz;
+    FragPos = (model * vec4(pos, 1.0)).xyz;
 }

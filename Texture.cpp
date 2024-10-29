@@ -29,6 +29,7 @@ Texture::~Texture() {
 }
 
 bool Texture::LoadTexture(bool alpha) {
+    filePath = "Assets/"+filePath;
     unsigned char* texData = stbi_load(filePath.c_str(), &width, &height, &bitDepth, alpha ? STBI_rgb_alpha : STBI_rgb);
     if (!texData) {
         std::cout << "Failed to find: " << filePath << std::endl;
