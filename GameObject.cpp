@@ -3,13 +3,17 @@
 #include <glm/gtc/quaternion.hpp> // Incluir las funciones de cuaterniones
 #include <algorithm>
 #include "include\stb\stb_image.h"
+#include "COMMODO_VALUES.h"
 
 GameObject::GameObject() :
-    mesh(nullptr), selected(false), showGizmos(false), showBoundingBox(false),
+    selected(false), showGizmos(false), showBoundingBox(false),
     showWireframe(false), showNormals(false), showBones(false), showSkeleton(false),
     showSkeletonJoints(false), showSkeletonBones(false), showSkeletonNames(false),
     showSkeletonWeights(false), showSelfWindow(false), soundSystem(nullptr),
     sound(nullptr), channel(nullptr), parent(nullptr) {
+
+	mesh.empty();
+
     position = glm::vec3(0.0f);
     rotation = glm::vec3(0.0f);
     scale = glm::vec3(1.0f);
@@ -17,8 +21,8 @@ GameObject::GameObject() :
 }
 
 GameObject::~GameObject() {
-    if (mesh) {
-        delete mesh;
+    if (mesh.size() > 0) {
+        mesh.empty();
     }
     for (auto child : children) {
         delete child;
@@ -36,6 +40,7 @@ void GameObject::SetPosition(const glm::vec3& newPosition) {
     position = newPosition;
     // Actualiza la matriz de modelo cuando la posición cambia
     model = glm::translate(glm::mat4(1.0f), position) * glm::mat4_cast(glm::quat(rotation)) * glm::scale(glm::mat4(1.0f), scale);
+    // model = glm::translate(model, position);
 }
 
 void GameObject::SetRotation(const glm::vec3& newRotation) {
@@ -67,24 +72,25 @@ glm::mat4 GameObject::GetModelMatrix() const {
 }
 
 void GameObject::CreateMesh(GLfloat* vertices, unsigned int* indices, unsigned int numOfVertices, unsigned int numOfIndices) {
-    if (mesh) {
-        delete mesh;
-    }
-    mesh = new Mesh();
-    mesh->CreateMesh(vertices, indices, numOfVertices, numOfIndices);
+    Mesh* newMesh = new Mesh();
+    newMesh->CreateMesh(vertices, indices, numOfVertices, numOfIndices);
+	mesh.push_back(newMesh);
 }
 
 void GameObject::CreateMesh(const std::string& filename) {
     Assimp::Importer importer;
-    const aiScene* scene = importer.ReadFile(filename, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_JoinIdenticalVertices);
+    const aiScene* scene = importer.ReadFile(filename, ASSIMP_LOAD_FLAGS);
 
     if (!scene) {
-        printf("Failed to load model: %s \n", filename.c_str(), importer.GetErrorString());
+		cout << "Failed to load model: " << filename << endl;
         return;
     }
 
     LoadNode(scene->mRootNode, scene);
     LoadMaterials(scene);
+
+    // vamos a usar las texturas
+
 
     if (scene->mAnimations != nullptr) {
         // Cargar animaciones, si existen
@@ -120,9 +126,13 @@ void GameObject::Update(float deltaTime) {
 }
 
 void GameObject::Render() {
-    if (mesh) {
-        mesh->RenderMesh();
-    }
+    for (int i = 0; i < mesh.size(); i++) {
+		unsigned int materialIndex = materialFaces[i];
+		if (! (materialIndex < textureList.size() ) && textureList[materialIndex]) {
+			textureList[materialIndex]->UseTexture();
+        }
+        mesh[i]->RenderMesh();
+	}
     for (auto& child : children) {
         child->Render();
     }
@@ -145,6 +155,7 @@ void GameObject::LoadNode(aiNode* node, const aiScene* scene) {
     for (unsigned int i = 0; i < node->mNumMeshes; i++) {
         LoadMesh(scene->mMeshes[node->mMeshes[i]], scene);
     }
+
     for (unsigned int i = 0; i < node->mNumChildren; i++) {
         LoadNode(node->mChildren[i], scene);
     }
@@ -164,7 +175,9 @@ void GameObject::LoadMesh(aiMesh* mesh, const aiScene* scene) {
             vertices.insert(vertices.end(), { 0.0f, 0.0f });
         }
 
-        vertices.insert(vertices.end(), { mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z });
+		// las normales deben invertirse para que se vean correctamente
+        vertices.insert(vertices.end(), { -mesh->mNormals[i].x, -mesh->mNormals[i].y, -mesh->mNormals[i].z });
+        // vertices.insert(vertices.end(), { mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z });
     }
 
     for (unsigned int i = 0; i < mesh->mNumFaces; i++) {
@@ -174,11 +187,15 @@ void GameObject::LoadMesh(aiMesh* mesh, const aiScene* scene) {
         }
     }
 
-    if (this->mesh) {
+    /*if (this->mesh) {
         delete this->mesh;
-    }
-    this->mesh = new Mesh();
-    this->mesh->CreateMesh(&vertices[0], &indices[0], vertices.size(), indices.size());
+    }*/
+
+    Mesh* newMesh = new Mesh();
+    newMesh->CreateMesh(&vertices[0], &indices[0], vertices.size(), indices.size());
+
+	this->mesh.push_back(newMesh);
+	this->materialFaces.push_back(mesh->mMaterialIndex);
 }
 
 void GameObject::LoadMaterials(const aiScene* scene) {
@@ -195,7 +212,9 @@ void GameObject::LoadMaterials(const aiScene* scene) {
                 if (tex) {
                     int width, height, channels;
                     unsigned char* imageData = nullptr;
+                    stbi_set_flip_vertically_on_load(true);
                     if (tex->mHeight == 0) {
+                        std::cout << "Cargando textura embebida" << std::endl;
                         imageData = stbi_load_from_memory(reinterpret_cast<unsigned char*>(tex->pcData), tex->mWidth, &width, &height, &channels, STBI_rgb_alpha);
                     }
                     else {
@@ -206,10 +225,16 @@ void GameObject::LoadMaterials(const aiScene* scene) {
                     }
 
                     if (imageData) {
+                        std::cout << "\tAñadiendo textura embebida" << std::endl;
                         textureList[i] = new Texture(imageData, width, height, channels);
-                        if (tex->mHeight == 0) {
-                            stbi_image_free(imageData);
+                        if (!textureList[i]->LoadTexture(true, true)) {
+                            std::cout << "\tFalló en cargar la Textura" << std::endl;
+                            delete textureList[i];
+                            textureList[i] = nullptr;
                         }
+                    }
+                    else {
+                        std::cout << "Falló en cargar la Textura embebida" << std::endl;
                     }
                 }
                 else {
@@ -218,9 +243,8 @@ void GameObject::LoadMaterials(const aiScene* scene) {
                     std::string filename = pathStr.substr(idx + 1);
                     std::string texPath = "Assets/Textures/" + filename;
                     textureList[i] = new Texture(texPath.c_str());
-
-                    if (!textureList[i]->LoadTexture(filename.find("tga") != std::string::npos || filename.find("png") != std::string::npos)) {
-                        printf("Falló en cargar la Textura :%s\n", texPath.c_str());
+                    if (!textureList[i]->LoadTexture(filename.find("tga") != std::string::npos || filename.find("png") != std::string::npos, false)) {
+                        std::cout << "Falló en cargar la Textura: " << texPath << std::endl;
                         delete textureList[i];
                         textureList[i] = nullptr;
                     }
@@ -229,8 +253,9 @@ void GameObject::LoadMaterials(const aiScene* scene) {
         }
 
         if (textureList[i] == nullptr) {
-            textureList[i] = new Texture("Textures/plain.png");
-            textureList[i]->LoadTexture(true);
+            std::cout << "Se carga la textura por defecto para " << i << std::endl;
+            textureList[i] = new Texture("Assets/Textures/plain.png");
+            textureList[i]->LoadTexture(true, false);
         }
     }
 }

@@ -64,14 +64,9 @@ public:
     void LoadMesh(aiMesh* mesh, const aiScene* scene);
 
 private:
-    Mesh* mesh;                 // mesh o modelo 3D
-
-    glm::mat4 model;            // matriz de transformación
-    glm::vec3 position;         // posición en el mundo
-    glm::vec3 rotation;         // rotación
-    glm::vec3 scale;            // escala
-
-	std::vector<Texture*> textureList;
+    // el animador y sus animaciones
+    Animation* animation;
+    Animator* animator;	
 
     bool selected;
     bool showGizmos;
@@ -91,12 +86,16 @@ private:
     FMOD::Sound* sound;          // sonido
     FMOD::Channel* channel;      // canal de sonido
 
-    // el animador y sus animaciones
-	Animation* animation;
-	Animator* animator;
+    glm::mat4 model;            // matriz de transformación
+    glm::vec3 position;         // posición en el mundo
+    glm::vec3 rotation;         // rotación
+    glm::vec3 scale;            // escala
 
     GameObject* parent;          // padre (puede ser nullptr)
-    vector<GameObject*> children; // hijos (puede estar vacío el vector)
 
-    std::vector<glm::mat4> boneTransforms; // transformaciones de huesos para animaciones
+    vector<GameObject*> children; // hijos (puede estar vacío el vector)
+    vector<Texture*> textureList;
+    vector<Mesh*> mesh;                 // meshes o modelos 3D
+    vector<unsigned int> materialFaces;     // índices de los meshes
+    vector<glm::mat4> boneTransforms; // transformaciones de huesos para animaciones
 };

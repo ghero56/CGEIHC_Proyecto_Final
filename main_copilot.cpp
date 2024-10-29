@@ -127,9 +127,11 @@ int main(void) {
     result = FMOD::System_Create(&system);
     system->init(512, FMOD_INIT_NORMAL, 0);
     FMOD::Sound* sound = nullptr;
+    /*
     system->createSound("Assets/Sounds/chilango.mp3", FMOD_DEFAULT, 0, &sound);
     FMOD::Channel* channel = nullptr;
     result = system->playSound(sound, nullptr, false, &channel);
+    */
 
     // GLFW initialization
     window = Window();
@@ -185,16 +187,19 @@ int main(void) {
 
     // Crear y configurar el GameObject
     GameObject* aurora = new GameObject();
-    // aurora->CreateMesh("Assets/Models/aurora.glb");
-    // aurora->CreateMesh();
+    aurora->CreateMesh("Assets/Models/aurora.glb");
     
-    
-    //aurora.SetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
-    //aurora.SetScale(glm::vec3(1.0f, 1.0f, 1.0f));
+    aurora->SetScale(glm::vec3(.1f, .1f, .1f));
 
     ImGui::FileBrowser fileDialog;
     bool demoWindow = true;
     bool EditorMode = true;
+
+	float modpos[3] = { 0.0f, 0.0f, 0.0f };
+    glm::vec3 modrot;
+    float modscale = 0.1f;
+
+    CreateObjects();
 
     while (!glfwWindowShouldClose(window.selfWindow)) {
         
@@ -205,7 +210,19 @@ int main(void) {
 
         // Renderización del GameObject
         glUseProgram(shaderProgram);
-        meshList[0]->RenderMesh();
+        //meshList[0]->RenderMesh();
+        
+
+		ImGui::Begin("Transformaciones de modelo");
+		ImGui::SliderFloat3("Posición", modpos, -10.0f, 10.0f);
+		//ImGui::SliderFloat3("Rotación", 
+		ImGui::SliderFloat("Escala", &modscale, 0.001f, 10.0f);
+		ImGui::End();
+        aurora->SetPosition(glm::vec3(modpos[0],modpos[1],modpos[2]));
+		//aurora->SetRotation(glm::vec3(modrot_x, 0.0f, 0.0f));
+		aurora->SetScale(glm::vec3(modscale));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(aurora->GetModelMatrix()));
+        aurora->Render();
 
         EndOfFrame(window.selfWindow);
     }

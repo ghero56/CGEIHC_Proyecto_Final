@@ -11,7 +11,7 @@ public:
     Texture(unsigned char* imageData, int width, int height, int channels);
     ~Texture();
 
-    bool LoadTexture(bool alpha);
+    bool LoadTexture(bool , bool);
     void UseTexture();
     void ClearTexture();
 
@@ -19,4 +19,5 @@ private:
     GLuint textureID;
     int width, height, bitDepth;
     std::string filePath;
+	unsigned char* imageData;
 };
