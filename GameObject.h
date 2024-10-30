@@ -25,6 +25,7 @@ using namespace std;
 class GameObject {
 public:
     GameObject();
+    GameObject(char*);
     ~GameObject();
 
     // Funciones para configurar y obtener propiedades del objeto
@@ -63,6 +64,11 @@ public:
 	void LoadNode(aiNode* node, const aiScene* scene);
     void LoadMesh(aiMesh* mesh, const aiScene* scene);
 
+	bool IsSelected() const { return selected; }
+    void SetSelected(bool selected) { this->selected = selected; }
+
+    void EditorTools(bool hide);
+
 private:
     // el animador y sus animaciones
     Animation* animation;
@@ -79,6 +85,7 @@ private:
     bool showSkeletonBones;
     bool showSkeletonNames;
     bool showSkeletonWeights;
+    bool bindScale;
 
     bool showSelfWindow;         // imgui self window para ver sus características al seleccionarlo
 
@@ -98,4 +105,6 @@ private:
     vector<Mesh*> mesh;                 // meshes o modelos 3D
     vector<unsigned int> materialFaces;     // índices de los meshes
     vector<glm::mat4> boneTransforms; // transformaciones de huesos para animaciones
+
+	char* name;                // nombre del objeto
 };

@@ -5,6 +5,21 @@
 #include "include\stb\stb_image.h"
 #include "COMMODO_VALUES.h"
 
+GameObject::GameObject(char* name):
+	name(name), selected(false), showGizmos(false), showBoundingBox(false),
+    showWireframe(false), showNormals(false), showBones(false), showSkeleton(false),
+    showSkeletonJoints(false), showSkeletonBones(false), showSkeletonNames(false),
+    showSkeletonWeights(false), showSelfWindow(false), soundSystem(nullptr),
+    sound(nullptr), channel(nullptr), parent(nullptr) {
+
+	mesh.empty();
+
+    position = glm::vec3(0.0f);
+    rotation = glm::vec3(0.0f);
+    scale = glm::vec3(1.0f);
+    model = glm::mat4(1.0f);
+}
+
 GameObject::GameObject() :
     selected(false), showGizmos(false), showBoundingBox(false),
     showWireframe(false), showNormals(false), showBones(false), showSkeleton(false),
@@ -12,7 +27,7 @@ GameObject::GameObject() :
     showSkeletonWeights(false), showSelfWindow(false), soundSystem(nullptr),
     sound(nullptr), channel(nullptr), parent(nullptr) {
 
-	mesh.empty();
+    mesh.empty();
 
     position = glm::vec3(0.0f);
     rotation = glm::vec3(0.0f);
@@ -260,3 +275,83 @@ void GameObject::LoadMaterials(const aiScene* scene) {
     }
 }
 
+void GameObject::EditorTools(bool hide){
+	if (hide) {
+		return;
+	}
+
+	float localx = position.x;
+	float localy = position.y;
+	float localz = position.z;
+
+	ImGui::Begin(this->name);
+
+    /* Debugs
+    ImGui::BeginListBox("Meshes");
+	for (int i = 0; i < mesh.size(); i++) {
+		ImGui::Text("Mesh %d", i);
+	}
+	ImGui::EndListBox();
+    */
+	
+
+	ImGui::Text("Position");
+	ImGui::SliderFloat("Position X", &localx, -10.0f, 10.0f);
+	ImGui::SliderFloat("Position Y", &localy, -10.0f, 10.0f);
+	ImGui::SliderFloat("Position Z", &localz, -10.0f, 10.0f);
+
+	SetPosition(glm::vec3(localx, localy, localz));
+
+	ImGui::Text("Rotation");
+	ImGui::SliderFloat("Rotation X", &rotation.x, -180.0f, 180.0f);
+	ImGui::SliderFloat("Rotation Y", &rotation.y, -180.0f, 180.0f);
+	ImGui::SliderFloat("Rotation Z", &rotation.z, -180.0f, 180.0f);
+
+    // la escala NO PUEDE ser 0
+	ImGui::Text("Scale");
+	ImGui::Checkbox("Bind scale", &bindScale);
+	if (bindScale) {
+        ImGui::SliderFloat("Scale global", &scale.x, 0.001f, 10.0f);
+		scale.x = scale.y = scale.z = scale.x;
+    }
+    else {
+        ImGui::SliderFloat("Scale X", &scale.x, 0.001f, 10.0f);
+        ImGui::SliderFloat("Scale Y", &scale.y, 0.001f, 10.0f);
+        ImGui::SliderFloat("Scale Z", &scale.z, 0.001f, 10.0f);
+    }
+	
+	ImGui::Checkbox("Show Gizmos", &showGizmos);
+	ImGui::Checkbox("Show Bounding Box", &showBoundingBox);
+	ImGui::Checkbox("Show Wireframe", &showWireframe);
+	ImGui::Checkbox("Show Normals", &showNormals);
+	ImGui::Checkbox("Show Bones", &showBones);
+	ImGui::Checkbox("Show Skeleton", &showSkeleton);
+	ImGui::Checkbox("Show Skeleton Joints", &showSkeletonJoints);
+	ImGui::Checkbox("Show Skeleton Bones", &showSkeletonBones);
+	ImGui::Checkbox("Show Skeleton Names", &showSkeletonNames);
+	ImGui::Checkbox("Show Skeleton Weights", &showSkeletonWeights);
+
+	ImGui::Checkbox("Show Self Window", &showSelfWindow);
+
+	if (ImGui::Button("Add Child")) {
+		GameObject* child = new GameObject(name + (char)children.size());
+		child->SetPosition(glm::vec3(1.0f, 1.0f, 1.0f));
+		AddChild(child);
+	}
+
+	if (ImGui::Button("Remove Child")) {
+		if (children.size() > 0) {
+			GameObject* child = children.back();
+			RemoveChild(child);
+			delete child;
+		}
+	}
+
+	ImGui::BeginChildFrame(1, ImVec2(0, 300), ImGuiWindowFlags_HorizontalScrollbar);
+	for (auto& child : children) {
+		child->EditorTools(false);
+	}
+	ImGui::EndChildFrame();
+
+	ImGui::End();
+}

@@ -148,6 +148,7 @@ xcopy /y /d "lib\assimp\*.dll" "$(OutDir)"
   <ItemGroup>
     <ClCompile Include="Animation.cpp" />
     <ClCompile Include="Animator.cpp" />
+    <ClCompile Include="Camera.cpp" />
     <ClCompile Include="COMMODO_VALUES.h" />
     <ClCompile Include="DirectionalLight.cpp" />
     <ClCompile Include="GameObject.cpp" />
@@ -172,6 +173,7 @@ xcopy /y /d "lib\assimp\*.dll" "$(OutDir)"
     <ClInclude Include="Animation.h" />
     <ClInclude Include="Animator.h" />
     <ClInclude Include="AssimpGLMHelpers.h" />
+    <ClInclude Include="Camera.h" />
     <ClInclude Include="DirectionalLight.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="GLSL_ShaderCompiler.h" />
@@ -193,8 +195,13 @@ xcopy /y /d "lib\assimp\*.dll" "$(OutDir)"
     <ClInclude Include="Window.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Assets\Models\aurora.glb" />
     <None Include="Assets\Shaders\FragmentShader.glsl" />
     <None Include="Assets\Shaders\vertexShader.glsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <Media Include="Assets\Sounds\chilango.mp3" />
+    <Media Include="Assets\Sounds\Howling Abyss.mp3" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

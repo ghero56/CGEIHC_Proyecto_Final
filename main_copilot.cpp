@@ -22,26 +22,45 @@
 #include "DirectionalLight.h"
 #include "PointLight.h"
 #include "SpotLight.h"
+#include "Camera.h"
 
 using namespace std;
 
 vector<Mesh*> meshList;
 
 Window window;
+Camera camera;
+
+GLfloat deltaTime = 0.0f;
+GLfloat lastTime = 0.0f;
+static double limitFPS = 1.0 / 60.0;
 
 void NewFrame() {
+    GLfloat now = glfwGetTime();
+    deltaTime = now - lastTime;
+    // deltaTime += (now - lastTime) / limitFPS;
+    lastTime = now;
+
+    glfwPollEvents();
+
     glClearColor(0.f, .5f, 1.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glfwPollEvents();
+
+    camera.keyControl(window.GetKeys(), deltaTime);
+    camera.mouseControl(window.GetMouseX(), window.GetMouseY());
+    camera.scrollControl(window.GetScrollY(), deltaTime);
+    camera.mouseButtons(window.GetMouseButtons());
+
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
-    ImGui::NewFrame();
+    ImGui::NewFrame();   
 }
 
 void EndOfFrame(GLFWwindow* wind) {
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-    glfwSwapBuffers(wind);
+    
+	window.SwapBuffers();
 }
 
 void ExitCleanup() {
@@ -53,15 +72,18 @@ void ExitCleanup() {
 }
 
 void EditorTools(bool* demoWindow, ImGui::FileBrowser* fileDialog) { 
+    // debug
     ImGui::Begin("Bool para el editor");
     ImGui::Text("Este boton activa la demo, por defecto viene en True");
     ImGui::Checkbox("Demo Window", demoWindow);
     ImGui::End();
 
+    // debug
     if (*demoWindow) {
         ImGui::ShowDemoWindow();
     }
 
+	// file explorer
     if (ImGui::Begin("Project Explorer")) {
         if (ImGui::Button("open file dialog"))
             fileDialog->Open();
@@ -126,16 +148,18 @@ int main(void) {
     FMOD::System* system = nullptr;
     result = FMOD::System_Create(&system);
     system->init(512, FMOD_INIT_NORMAL, 0);
+    
     FMOD::Sound* sound = nullptr;
-    /*
-    system->createSound("Assets/Sounds/chilango.mp3", FMOD_DEFAULT, 0, &sound);
+    system->createSound("Assets/Sounds/Howling Abyss.mp3", FMOD_DEFAULT, 0, &sound);
     FMOD::Channel* channel = nullptr;
     result = system->playSound(sound, nullptr, false, &channel);
-    */
 
     // GLFW initialization
     window = Window();
     window.Initialize(720, 720);
+
+    glfwPollEvents();
+    glfwSetInputMode(window.selfWindow, GLFW_STICKY_KEYS, GLFW_TRUE);
 
     // ImGui initialization
     ImGuiIO& imgui_io = ImGui::GetIO();
@@ -155,7 +179,7 @@ int main(void) {
     glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
     if (!success) {
         glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
-        printf("Error al enlazar el programa de shaders: %s\n", infoLog);
+		cout << "Error al compilar el programa de shaders: " << infoLog << endl;
     }
 
     // Eliminar los shaders ahora que están vinculados al programa
@@ -163,7 +187,10 @@ int main(void) {
     //glDeleteShader(fragmentShader);
 
     // Usar el programa de shaders antes de setear uniformes
-    glUseProgram(shaderProgram);
+    // glUseProgram(shaderProgram);
+
+    // inicialización de la camara
+    camera = Camera(glm::vec3(0.0f, 0.0f, 10.0f), glm::vec3(0.0f, 1.0f, 0.0f), -60.0f, 0.0f, 0.5f, 0.5f);
 
     // Inicialización de uniforms
     GLuint modelLoc = glGetUniformLocation(shaderProgram, "model");
@@ -175,18 +202,18 @@ int main(void) {
     GLuint toffsetLoc = glGetUniformLocation(shaderProgram, "toffset");
 
     glm::mat4 model = glm::mat4(1.0f);
-    glm::mat4 view = glm::lookAt(glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-    glm::mat4 projection = glm::perspective(glm::radians(45.0f), (GLfloat)window.getBufferWidth() / window.getBufferHeight(), 0.1f, 100.0f);
+    // glm::mat4 view = glm::lookAt(glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    glm::mat4 projection = glm::perspective(glm::radians(45.0f), (GLfloat)window.getBufferWidth() / window.getBufferHeight(), 0.1f, 1000.0f);
     glm::mat4 lightSpaceMatrix = glm::mat4(1.0f);
 
     // Configura los uniforms
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(camera.calculateViewMatrix()));
     glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
     glUniformMatrix4fv(lightSpaceMatrixLoc, 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix));
 
     // Crear y configurar el GameObject
-    GameObject* aurora = new GameObject();
+    GameObject* aurora = new GameObject((char*)"Aurora LOL");
     aurora->CreateMesh("Assets/Models/aurora.glb");
     
     aurora->SetScale(glm::vec3(.1f, .1f, .1f));
@@ -195,11 +222,10 @@ int main(void) {
     bool demoWindow = true;
     bool EditorMode = true;
 
-	float modpos[3] = { 0.0f, 0.0f, 0.0f };
-    glm::vec3 modrot;
-    float modscale = 0.1f;
-
     CreateObjects();
+
+	glfwGetTime();
+	glfwSetTime(0.0);
 
     while (!glfwWindowShouldClose(window.selfWindow)) {
         
@@ -208,21 +234,20 @@ int main(void) {
         if (EditorMode)     
             EditorTools(&demoWindow, &fileDialog);
 
+        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(camera.calculateViewMatrix()));
+        glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
+        glUniformMatrix4fv(lightSpaceMatrixLoc, 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix));
+
         // Renderización del GameObject
         glUseProgram(shaderProgram);
-        //meshList[0]->RenderMesh();
-        
+		model = glm::mat4(1.0f);
+        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+        meshList[0]->RenderMesh();
 
-		ImGui::Begin("Transformaciones de modelo");
-		ImGui::SliderFloat3("Posición", modpos, -10.0f, 10.0f);
-		//ImGui::SliderFloat3("Rotación", 
-		ImGui::SliderFloat("Escala", &modscale, 0.001f, 10.0f);
-		ImGui::End();
-        aurora->SetPosition(glm::vec3(modpos[0],modpos[1],modpos[2]));
-		//aurora->SetRotation(glm::vec3(modrot_x, 0.0f, 0.0f));
-		aurora->SetScale(glm::vec3(modscale));
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(aurora->GetModelMatrix()));
         aurora->Render();
+
+		aurora->EditorTools(!EditorMode);
 
         EndOfFrame(window.selfWindow);
     }
