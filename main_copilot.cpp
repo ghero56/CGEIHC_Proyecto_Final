@@ -190,7 +190,7 @@ int main(void) {
     // glUseProgram(shaderProgram);
 
     // inicialización de la camara
-    camera = Camera(glm::vec3(0.0f, 0.0f, 10.0f), glm::vec3(0.0f, 1.0f, 0.0f), -60.0f, 0.0f, 0.5f, 0.5f);
+    camera = Camera(glm::vec3(0.0f, 0.0f, 10.0f), glm::vec3(0.0f, 1.0f, 0.0f), -60.0f, 0.0f, 1.5f, 0.5f);
 
     // Inicialización de uniforms
     GLuint modelLoc = glGetUniformLocation(shaderProgram, "model");

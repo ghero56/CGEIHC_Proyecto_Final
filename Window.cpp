@@ -142,15 +142,14 @@ void Window::cursorPosCallback(GLFWwindow* window, double xpos, double ypos) {
 		theWindow->mouseHasMoved = false;
 	}
 
-	// Almacena el cambio actual
+	// Calcula el cambio en la posición del mouse
 	theWindow->mouse_x = xpos - theWindow->lastX;
 	theWindow->mouse_y = theWindow->lastY - ypos;
 
-	// Actualiza `lastX` y `lastY` con las nuevas posiciones
+	// Ahora actualiza `lastX` y `lastY`
 	theWindow->lastX = xpos;
 	theWindow->lastY = ypos;
 }
-
 
 void Window::mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
 	Window* theWindow = static_cast<Window*>(glfwGetWindowUserPointer(window));
@@ -186,4 +185,22 @@ void Window::mouseButtonCallback(GLFWwindow* window, int button, int action, int
 void Window::scrollCallback(GLFWwindow* window, double xoffset, double yoffset) {
 	Window* theWindow = static_cast<Window*>(glfwGetWindowUserPointer(window));
 	theWindow->scroll_y = yoffset;
+}
+
+GLfloat Window::GetMouseX() {
+	GLfloat TNX = mouse_x;
+	mouse_x = 0.0f;
+	return TNX;
+}
+
+GLfloat Window::GetMouseY() {
+	GLfloat TNY = mouse_y;
+	mouse_y = 0.0f;
+	return TNY;
+}
+
+GLfloat Window::GetScrollY() {
+	GLfloat TNY = scroll_y;
+	scroll_y = 0.0f;
+	return TNY;
 }

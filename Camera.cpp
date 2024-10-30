@@ -1,16 +1,9 @@
 #include "Camera.h"
 
 Camera::Camera(glm::vec3 startPosition, glm::vec3 startUp, GLfloat startYaw, GLfloat startPitch, GLfloat startMoveSpeed, GLfloat startTurnSpeed)
+		: position(startPosition), worldUp(startUp), yaw(startYaw), pitch(startPitch), moveSpeed(startMoveSpeed), turnSpeed(startTurnSpeed), front(0.0f, 0.0f, -1.0f) 
 {
-	position = startPosition;
-	worldUp = startUp;
-	yaw = startYaw;
-	pitch = startPitch;
-	front = glm::vec3(0.0f, 0.0f, -1.0f);
-
-	moveSpeed = startMoveSpeed;
-	turnSpeed = startTurnSpeed;
-
+	update();  // Asegura que `front` se inicializa correctamente
 	Debug();
 }
 
@@ -51,10 +44,6 @@ void Camera::keyControl(bool* keys, GLfloat deltaTime)
 		{
 			position += up * velocity;
 		}
-
-		Debug();
-
-		update();
 	}
 }
 
@@ -87,16 +76,23 @@ void Camera::mouseButtons(int* buttons)
 }
 
 void Camera::mouseControl(GLfloat xChange, GLfloat yChange) {
+	xChange *= turnSpeed;
+	yChange *= turnSpeed;
+
 	if (!EnableMovementKeys) return;
 
-	yaw += xChange * turnSpeed;
-	pitch += yChange * turnSpeed;
+	// Verifica si el cambio es significativo para evitar deslizamientos
+	const float threshold = 0.0001f;
+	if (fabs(xChange) > threshold || fabs(yChange) > threshold) {
+		yaw += xChange;
+		pitch += yChange;
 
-	// Limita el pitch para evitar la inversión de la cámara
-	if (pitch > 89.0f) pitch = 89.0f;
-	if (pitch < -89.0f) pitch = -89.0f;
+		// Limita el pitch para evitar la inversión de la cámara
+		if (pitch > 89.0f) pitch = 89.0f;
+		if (pitch < -89.0f) pitch = -89.0f;
 
-	update();
+		update();  // Actualiza la dirección de la cámara
+	}
 }
 
 glm::mat4 Camera::calculateViewMatrix()
@@ -117,9 +113,16 @@ glm::vec3 Camera::getCameraDirection()
 void Camera::update() {
 	// Calcula el nuevo vector front
 	glm::vec3 front;
-	front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-	front.y = sin(glm::radians(pitch));
-	front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+	if (scrollableWindow) {
+		front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+		front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+	}
+	else if (EnableMovementKeys) {
+		front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+		front.y = sin(glm::radians(pitch));
+		front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+	}
+	
 	this->front = glm::normalize(front);
 
 	// Recalcula el vector right y el vector up

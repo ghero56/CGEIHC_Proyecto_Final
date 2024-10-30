@@ -36,9 +36,9 @@ public:
 	void SetWindow(GLFWwindow* window) { selfWindow = window; }
 
 	bool* GetKeys() { return keys; }
-	double GetMouseX() { return mouse_x; }
-	double GetMouseY() { return mouse_y; }
-	double GetScrollY() { return scroll_y; }
+	GLfloat GetMouseX();
+	GLfloat GetMouseY();
+	GLfloat GetScrollY();
 
 	int* GetMouseButtons() { return mouseButtons; };
 
@@ -48,7 +48,7 @@ private:
 
 	double mouse_x, mouse_y, scroll_y;
 	double lastX, lastY;
-	bool mouseHasMoved = true;
+	bool mouseHasMoved = false;
 
 	bool keys[1024];
 
