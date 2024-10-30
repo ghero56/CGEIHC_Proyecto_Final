@@ -53,6 +53,8 @@ void Camera::keyControl(bool* keys, GLfloat deltaTime)
 		}
 
 		Debug();
+
+		update();
 	}
 }
 
@@ -85,6 +87,8 @@ void Camera::mouseButtons(int* buttons)
 }
 
 void Camera::mouseControl(GLfloat xChange, GLfloat yChange) {
+	if (!EnableMovementKeys) return;
+
 	yaw += xChange * turnSpeed;
 	pitch += yChange * turnSpeed;
 

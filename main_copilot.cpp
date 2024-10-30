@@ -215,12 +215,11 @@ int main(void) {
     // Crear y configurar el GameObject
     GameObject* aurora = new GameObject((char*)"Aurora LOL");
     aurora->CreateMesh("Assets/Models/aurora.glb");
-    
     aurora->SetScale(glm::vec3(.1f, .1f, .1f));
 
     ImGui::FileBrowser fileDialog;
-    bool demoWindow = true;
-    bool EditorMode = true;
+    bool demoWindow = true; // quitar
+    bool EditorMode = true; 
 
     CreateObjects();
 

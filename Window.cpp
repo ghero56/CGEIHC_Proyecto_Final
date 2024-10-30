@@ -128,6 +128,9 @@ void Window::keyCallback(GLFWwindow* window, int key, int scancode, int action, 
 			// cout << "se solto la tecla " << key << endl;
 		}
 	}
+
+	// Método de crear nuevo GameObject
+	// Método de entrar y salir del modo editor
 }
 
 void Window::cursorPosCallback(GLFWwindow* window, double xpos, double ypos) {
