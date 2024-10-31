@@ -23,11 +23,12 @@
 #include "PointLight.h"
 #include "SpotLight.h"
 #include "Camera.h"
-#include <json.hpp>
+
 
 using namespace std;
 
-
+vector<Mesh*> meshList;
+vector<GameObject*> gameObjects;
 
 Window window;
 Camera camera;
@@ -36,8 +37,7 @@ GLfloat deltaTime = 0.0f;
 GLfloat lastTime = 0.0f;
 static double limitFPS = 1.0 / 60.0;
 
-vector<GameObject*> gameObjects;
-vector<Mesh*> meshList;
+static char name[20] = "";
 
 void NewFrame() {
     GLfloat now = glfwGetTime();
@@ -75,8 +75,9 @@ void ExitCleanup() {
     glfwTerminate();
 }
 
-void EditorTools(bool* demoWindow, ImGui::FileBrowser* fileDialog) { 
+void EditorToolsM(bool* demoWindow, ImGui::FileBrowser* fileDialog) {
     // debug
+    //cout << "Name: " << name << std::endl;
     ImGui::Begin("Bool para el editor");
     ImGui::Text("Este boton activa la demo, por defecto viene en True");
     ImGui::Checkbox("Demo Window", demoWindow);
@@ -87,25 +88,37 @@ void EditorTools(bool* demoWindow, ImGui::FileBrowser* fileDialog) {
         ImGui::ShowDemoWindow();
     }
 
-	// file explorer
-    if (true) {
-        ImGui::Begin("Project Explorer");
-        if (ImGui::Button("open file dialog"))
+    // file explorer
+    if (ImGui::Begin("Project Explorer")) {
+        ImGui::InputTextWithHint("Nombre", "texto", name, IM_ARRAYSIZE(name));
+        if (ImGui::Button("explorador"))
+        {
             fileDialog->Open();
+        }
+        /*else if (ImGui::Button("pop up"))
+        {
+            ImGui::OpenPopup("Modal window");
+            bool open = true;
+            if (ImGui::BeginPopupModal("Modal window", &open))
+            {
+                ImGui::Text("Hello dsjfhds fhjs hfj dshfj hds");
+                if (ImGui::Button("Close"))
+                    ImGui::CloseCurrentPopup();
+                ImGui::EndPopup();
+            }
+        }*/
     }
     ImGui::End();
 
     fileDialog->Display();
 
     // handle de los archivos
-    if (fileDialog->HasSelected()) {
+    if (fileDialog->HasSelected())
+    {
         cout << "Selected filename" << fileDialog->GetSelected().string() << std::endl;
-        //char* name;
-		// pop up que solicite el nombre para el gameobject
-        //ImGui::noseque("Ponle un nombre al nuevo objeto", &name)
-        // ese nombre se pasa como argumento
-		//gameObjects.push_back(new GameObject(name));
-		//gameObjects[gameObjects.size() - 1]->CreateMesh(fileDialog->GetSelected().string().c_str());
+        char* nombre = _strdup(name);
+        gameObjects.push_back(new GameObject(nombre));
+        gameObjects[gameObjects.size() - 1]->CreateMesh(fileDialog->GetSelected().string().c_str());
         fileDialog->ClearSelected();
     }
 }
@@ -167,7 +180,7 @@ int main(void) {
 
     // GLFW initialization
     window = Window();
-    window.Initialize(720, 720);
+    window.Initialize(1920, 1080);
 
     glfwPollEvents();
     glfwSetInputMode(window.selfWindow, GLFW_STICKY_KEYS, GLFW_TRUE);
@@ -201,7 +214,7 @@ int main(void) {
     // glUseProgram(shaderProgram);
 
     // inicialización de la camara
-    camera = Camera(glm::vec3(0.0f, 3.0f, 10.0f), glm::vec3(0.0f, 1.0f, 0.0f), -60.0f, 0.0f, 10.0f, 0.5f);
+    camera = Camera(glm::vec3(0.0f, 0.0f, 10.0f), glm::vec3(0.0f, 1.0f, 0.0f), -60.0f, 0.0f, 10.0f, 0.5f);
 
     // Inicialización de uniforms
     GLuint modelLoc = glGetUniformLocation(shaderProgram, "model");
@@ -242,7 +255,7 @@ int main(void) {
         NewFrame();
 
         if (EditorMode)     
-            EditorTools(&demoWindow, &fileDialog);
+            EditorToolsM(&demoWindow, &fileDialog);
 
         glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(camera.calculateViewMatrix()));
         glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
@@ -251,20 +264,32 @@ int main(void) {
         // Renderización del GameObject
         glUseProgram(shaderProgram);
 		model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(0.0f, 3.0f, -5.0f));
         glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
         meshList[0]->RenderMesh();
 
+        //if (gameObjects.size() > 0)
+        //{
+        //    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(gameObjects[gameObjects.size()-1]->GetModelMatrix()));
+        //    gameObjects[gameObjects.size() - 1]->Render();
+        //    gameObjects[gameObjects.size() - 1]->EditorTools(!EditorMode);
+        //}
 
-		// Renderización del GameObject
-        if (aurora->HasAnimation()) {
-            aurora->Animate(deltaTime);
-            glUniformMatrix4fv(boneTransformsLoc, aurora->GetBoneTransforms().size(), GL_FALSE, glm::value_ptr(aurora->GetBoneTransforms()[0]));
+        if (!gameObjects.empty())
+        {
+            for (auto& gameObject : gameObjects)
+            {
+                // Actualizar la matriz de modelo en el shader
+                glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(gameObject->GetModelMatrix()));
+
+                // Renderizar el objeto
+                gameObject->Render();
+
+                // Herramientas de edición (pasando el modo de edición como parámetro)
+                gameObject->EditorTools(!EditorMode);
+            }
         }
 
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(aurora->GetModelMatrix()));
-        aurora->Render();
-        aurora->EditorTools(!EditorMode);
+		//aurora->EditorTools(!EditorMode);
 
         EndOfFrame(window.selfWindow);
     }
