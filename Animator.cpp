@@ -1,5 +1,8 @@
 #include "Animator.h"
 #include <glm/gtc/matrix_transform.hpp>
+#include <iostream>
+
+using namespace std;
 
 Animator::Animator(Animation* animation)
     : currentAnimation(animation), currentTime(0.0f), finalBoneMatrices(100, glm::mat4(1.0f)) {
@@ -27,13 +30,19 @@ std::vector<glm::mat4> Animator::GetFinalBoneMatrices() {
 }
 
 void Animator::CalculateBoneTransform(const aiNode* node, glm::mat4 parentTransform) {
+    if (!node || !node->mName.data) {
+        return; // Retorna si node es nulo o mName.data no está inicializado
+    }
+    
     std::string nodeName(node->mName.data);
+    cout << node->mName.data << endl;
     const aiAnimation* animation = currentAnimation->GetAssimpAnimation();
 
     // Encuentra el canal de animación correspondiente al nodo actual
     const aiNodeAnim* nodeAnim = nullptr;
     for (unsigned int i = 0; i < animation->mNumChannels; i++) {
-        if (std::string(animation->mChannels[i]->mNodeName.data) == nodeName) {
+        if (animation->mChannels[i]->mNodeName.data &&
+            std::string(animation->mChannels[i]->mNodeName.data) == nodeName) {
             nodeAnim = animation->mChannels[i];
             break;
         }

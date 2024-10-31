@@ -110,7 +110,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>include;include\fmod\core\inc;include\fmod\studio\inc;include\imgui;include\imgui\backends;include\assimp;include\GL;include\glm;include\GLFW;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>include;include\jsoncons;include\jsoncons_ext;include\fmod\core\inc;include\fmod\studio\inc;include\imgui;include\imgui\backends;include\assimp;include\GL;include\glm;include\GLFW;</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>

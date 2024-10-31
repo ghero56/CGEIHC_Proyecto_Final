@@ -24,8 +24,11 @@ using namespace std;
 
 class GameObject {
 public:
+    void Animate(float deltaTime);
+
     GameObject();
     GameObject(char*);
+    GameObject(char* name, GameObject* parent);
     ~GameObject();
 
     // Funciones para configurar y obtener propiedades del objeto
@@ -68,6 +71,11 @@ public:
     void SetSelected(bool selected) { this->selected = selected; }
 
     void EditorTools(bool hide);
+
+    bool HasAnimation() const {
+        return (animation != nullptr && animator != nullptr);
+    }
+
 
 private:
     // el animador y sus animaciones

@@ -10,9 +10,24 @@ GameObject::GameObject(char* name):
     showWireframe(false), showNormals(false), showBones(false), showSkeleton(false),
     showSkeletonJoints(false), showSkeletonBones(false), showSkeletonNames(false),
     showSkeletonWeights(false), showSelfWindow(false), soundSystem(nullptr),
-    sound(nullptr), channel(nullptr), parent(nullptr) {
+    sound(nullptr), channel(nullptr), parent(nullptr), animator(nullptr), animation(nullptr) {
 
 	mesh.empty();
+
+    position = glm::vec3(0.0f);
+    rotation = glm::vec3(0.0f);
+    scale = glm::vec3(1.0f);
+    model = glm::mat4(1.0f);
+}
+
+GameObject::GameObject(char* name, GameObject* parent) :
+    name(name), selected(false), showGizmos(false), showBoundingBox(false),
+    showWireframe(false), showNormals(false), showBones(false), showSkeleton(false),
+    showSkeletonJoints(false), showSkeletonBones(false), showSkeletonNames(false),
+    showSkeletonWeights(false), showSelfWindow(false), soundSystem(nullptr),
+    sound(nullptr), channel(nullptr), parent(parent), animator(nullptr), animation(nullptr) {
+
+    mesh.empty();
 
     position = glm::vec3(0.0f);
     rotation = glm::vec3(0.0f);
@@ -25,7 +40,7 @@ GameObject::GameObject() :
     showWireframe(false), showNormals(false), showBones(false), showSkeleton(false),
     showSkeletonJoints(false), showSkeletonBones(false), showSkeletonNames(false),
     showSkeletonWeights(false), showSelfWindow(false), soundSystem(nullptr),
-    sound(nullptr), channel(nullptr), parent(nullptr) {
+    sound(nullptr), channel(nullptr), parent(nullptr), animator(nullptr), animation(nullptr) {
 
     mesh.empty();
 
@@ -114,6 +129,13 @@ void GameObject::CreateMesh(const std::string& filename) {
     }
 }
 
+void GameObject::Animate(float deltaTime) {
+    if (animator && animation) {
+        animator->UpdateAnimation(deltaTime);
+        // Actualizamos las transformaciones de huesos con las matrices calculadas por el animador
+        boneTransforms = animator->GetFinalBoneMatrices();
+    }
+}
 
 void GameObject::SetBoneTransforms(const std::vector<glm::mat4>& transforms) {
     boneTransforms = transforms;

@@ -23,6 +23,7 @@
 #include "PointLight.h"
 #include "SpotLight.h"
 #include "Camera.h"
+#include <json.hpp>
 
 using namespace std;
 
@@ -190,7 +191,7 @@ int main(void) {
     // glUseProgram(shaderProgram);
 
     // inicialización de la camara
-    camera = Camera(glm::vec3(0.0f, 0.0f, 10.0f), glm::vec3(0.0f, 1.0f, 0.0f), -60.0f, 0.0f, 1.5f, 0.5f);
+    camera = Camera(glm::vec3(0.0f, 3.0f, 10.0f), glm::vec3(0.0f, 1.0f, 0.0f), -60.0f, 0.0f, 10.0f, 0.5f);
 
     // Inicialización de uniforms
     GLuint modelLoc = glGetUniformLocation(shaderProgram, "model");
@@ -203,7 +204,7 @@ int main(void) {
 
     glm::mat4 model = glm::mat4(1.0f);
     // glm::mat4 view = glm::lookAt(glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-    glm::mat4 projection = glm::perspective(glm::radians(45.0f), (GLfloat)window.getBufferWidth() / window.getBufferHeight(), 0.1f, 1000.0f);
+    glm::mat4 projection = glm::perspective(glm::radians(45.0f), (GLfloat)window.getBufferWidth() / window.getBufferHeight(), 0.1f, 10000.0f);
     glm::mat4 lightSpaceMatrix = glm::mat4(1.0f);
 
     // Configura los uniforms
@@ -240,13 +241,21 @@ int main(void) {
         // Renderización del GameObject
         glUseProgram(shaderProgram);
 		model = glm::mat4(1.0f);
+		model = glm::translate(model, glm::vec3(0.0f, 3.0f, -5.0f));
         glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
         meshList[0]->RenderMesh();
 
+
+		// Renderización del GameObject
+        /*
+        if (aurora->HasAnimation()) {
+            aurora->Animate(deltaTime);
+            glUniformMatrix4fv(boneTransformsLoc, aurora->GetBoneTransforms().size(), GL_FALSE, glm::value_ptr(aurora->GetBoneTransforms()[0]));
+        }*/
+
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(aurora->GetModelMatrix()));
         aurora->Render();
-
-		aurora->EditorTools(!EditorMode);
+        aurora->EditorTools(!EditorMode);
 
         EndOfFrame(window.selfWindow);
     }
