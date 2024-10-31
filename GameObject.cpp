@@ -316,7 +316,6 @@ void GameObject::EditorTools(bool hide){
 	ImGui::EndListBox();
     */
 	
-
 	ImGui::Text("Position");
 	ImGui::SliderFloat("Position X", &localx, -10.0f, 10.0f);
 	ImGui::SliderFloat("Position Y", &localy, -10.0f, 10.0f);

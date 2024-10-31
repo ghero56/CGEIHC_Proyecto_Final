@@ -27,7 +27,7 @@
 
 using namespace std;
 
-vector<Mesh*> meshList;
+
 
 Window window;
 Camera camera;
@@ -35,6 +35,9 @@ Camera camera;
 GLfloat deltaTime = 0.0f;
 GLfloat lastTime = 0.0f;
 static double limitFPS = 1.0 / 60.0;
+
+vector<GameObject*> gameObjects;
+vector<Mesh*> meshList;
 
 void NewFrame() {
     GLfloat now = glfwGetTime();
@@ -85,7 +88,8 @@ void EditorTools(bool* demoWindow, ImGui::FileBrowser* fileDialog) {
     }
 
 	// file explorer
-    if (ImGui::Begin("Project Explorer")) {
+    if (true) {
+        ImGui::Begin("Project Explorer");
         if (ImGui::Button("open file dialog"))
             fileDialog->Open();
     }
@@ -96,6 +100,12 @@ void EditorTools(bool* demoWindow, ImGui::FileBrowser* fileDialog) {
     // handle de los archivos
     if (fileDialog->HasSelected()) {
         cout << "Selected filename" << fileDialog->GetSelected().string() << std::endl;
+        //char* name;
+		// pop up que solicite el nombre para el gameobject
+        //ImGui::noseque("Ponle un nombre al nuevo objeto", &name)
+        // ese nombre se pasa como argumento
+		//gameObjects.push_back(new GameObject(name));
+		//gameObjects[gameObjects.size() - 1]->CreateMesh(fileDialog->GetSelected().string().c_str());
         fileDialog->ClearSelected();
     }
 }
@@ -247,11 +257,10 @@ int main(void) {
 
 
 		// Renderización del GameObject
-        /*
         if (aurora->HasAnimation()) {
             aurora->Animate(deltaTime);
             glUniformMatrix4fv(boneTransformsLoc, aurora->GetBoneTransforms().size(), GL_FALSE, glm::value_ptr(aurora->GetBoneTransforms()[0]));
-        }*/
+        }
 
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(aurora->GetModelMatrix()));
         aurora->Render();
