@@ -52,66 +52,79 @@ uniform vec3 eyePosition;
 uniform sampler2D shadowMap; // Shadow map
 
 vec4 CalcLightByDirection(Light light, vec3 direction) {
-    vec4 ambientcolor = vec4(light.color, 1.0f) * light.ambientIntensity;
+    vec4 ambientColor = vec4(light.color, 1.0f) * light.ambientIntensity;
     float diffuseFactor = max(dot(normalize(Normal), normalize(direction)), 0.0f);
-    vec4 diffusecolor = vec4(light.color * light.diffuseIntensity * diffuseFactor, 1.0f);
+    vec4 diffuseColor = vec4(light.color * light.diffuseIntensity * diffuseFactor, 1.0f);
 
-    vec4 specularcolor = vec4(0, 0, 0, 0);
+    vec4 specularColor = vec4(0, 0, 0, 0);
     if (diffuseFactor > 0.0f) {
         vec3 fragToEye = normalize(eyePosition - FragPos);
-        vec3 reflectedVertex = normalize(reflect(direction, normalize(Normal)));
+        vec3 reflectedVertex = normalize(reflect(-direction, normalize(Normal)));
         float specularFactor = dot(fragToEye, reflectedVertex);
         if (specularFactor > 0.0f) {
             specularFactor = pow(specularFactor, material.shininess);
-            specularcolor = vec4(light.color * material.specularIntensity * specularFactor, 1.0f);
+            specularColor = vec4(light.color * material.specularIntensity * specularFactor, 1.0f);
         }
     }
-    return (ambientcolor + diffusecolor + specularcolor);
+    return (ambientColor + diffuseColor + specularColor);
 }
 
 vec4 CalcDirectionalLight() {
-    return CalcLightByDirection(directionalLight.base, directionalLight.direction);
+    return CalcLightByDirection(directionalLight.base, normalize(directionalLight.direction));
 }
 
 vec4 CalcPointLight(PointLight pLight) {
     vec3 direction = FragPos - pLight.position;
     float distance = length(direction);
     direction = normalize(direction);
-    vec4 color = CalcLightByDirection(pLight.base, direction);
+    vec4 lightColor = CalcLightByDirection(pLight.base, direction);
     float attenuation = pLight.exponent * distance * distance + pLight.linear * distance + pLight.constant;
-    return (color / attenuation);
+
+    if (attenuation > 0.0) {
+        return (lightColor / attenuation);
+    } else {
+        return vec4(0.0);
+    }
 }
 
 vec4 CalcSpotLight(SpotLight sLight) {
     vec3 rayDirection = normalize(FragPos - sLight.base.position);
-    float slFactor = dot(rayDirection, sLight.direction);
-    if (slFactor > sLight.edge) {
-        vec4 color = CalcPointLight(sLight.base);
-        return color * (1.0f - (1.0f - slFactor) * (1.0f / (1.0f - sLight.edge)));
+    float slFactor = dot(rayDirection, normalize(sLight.direction));
+    if (slFactor > cos(sLight.edge)) { // Compare with cos(edge)
+        vec4 lightColor = CalcPointLight(sLight.base);
+        return lightColor * (1.0f - (1.0f - slFactor) / (1.0f - cos(sLight.edge)));
     } else {
         return vec4(0, 0, 0, 0);
     }
 }
 
 vec4 CalcPointLights() {
-    vec4 totalcolor = vec4(0, 0, 0, 0);
+    vec4 totalColor = vec4(0, 0, 0, 0);
     for (int i = 0; i < pointLightCount; i++) {
-        totalcolor += CalcPointLight(pointLights[i]);
+        totalColor += CalcPointLight(pointLights[i]);
     }
-    return totalcolor;
+    return totalColor;
 }
 
 vec4 CalcSpotLights() {
-    vec4 totalcolor = vec4(0, 0, 0, 0);
+    vec4 totalColor = vec4(0, 0, 0, 0);
     for (int i = 0; i < spotLightCount; i++) {
-        totalcolor += CalcSpotLight(spotLights[i]);
+        totalColor += CalcSpotLight(spotLights[i]);
     }
-    return totalcolor;
+    return totalColor;
 }
 
 void main() {
-    vec4 finalcolor = CalcDirectionalLight();
-    finalcolor += CalcPointLights();
-    finalcolor += CalcSpotLights();
-    color = texture(theTexture, TexCoord) * vColor * finalcolor;
+    vec4 finalColor = CalcDirectionalLight();
+    finalColor += CalcPointLights();
+    finalColor += CalcSpotLights();
+
+    // Combine texture color with lighting
+    color = texture(theTexture, TexCoord) * vColor * finalColor;
+    // color = texture(theTexture, TexCoord) * finalColor;
+    //color = texture(theTexture, TexCoord);
+
+
+    // Clamping to prevent out-of-range values
+    color = clamp(color, 0.0, 1.0);
 }

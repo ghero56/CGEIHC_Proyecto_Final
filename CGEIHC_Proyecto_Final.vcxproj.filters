@@ -90,13 +90,13 @@
     <ClCompile Include="SpotLight.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
-    <ClCompile Include="main_copilot.cpp">
-      <Filter>Archivos de origen</Filter>
-    </ClCompile>
     <ClCompile Include="stb_image.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
     <ClCompile Include="Camera.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="main_copilot.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
   </ItemGroup>

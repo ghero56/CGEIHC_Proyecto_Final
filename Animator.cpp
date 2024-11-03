@@ -4,15 +4,18 @@
 
 using namespace std;
 
-Animator::Animator(Animation* animation)
-    : currentAnimation(animation), currentTime(0.0f), finalBoneMatrices(100, glm::mat4(1.0f)) {
+Animator::Animator(vector<Animation*> animations) {
+	this->animations = animations;
+	currentAnimation = animations[0]; // por defecto
+	currentTime = 0.0f;
+	totalAnimations = animations.size();
 }
 
 void Animator::UpdateAnimation(float deltaTime) {
-    currentTime += currentAnimation->GetTicksPerSecond() * deltaTime;
-    currentTime = fmod(currentTime, currentAnimation->GetDuration()); // Ciclo de la animación
+    if (currentAnimation) { // Verificar currentAnimation antes de usar sus métodos
+        currentTime += currentAnimation->GetTicksPerSecond() * deltaTime;
+        currentTime = fmod(currentTime, currentAnimation->GetDuration()); // Ciclo de la animación
 
-    if (currentAnimation) {
         const aiScene* scene = currentAnimation->GetAssimpScene();
         if (scene) {
             CalculateBoneTransform(scene->mRootNode, glm::mat4(1.0f));
@@ -33,12 +36,13 @@ void Animator::CalculateBoneTransform(const aiNode* node, glm::mat4 parentTransf
     if (!node || !node->mName.data) {
         return; // Retorna si node es nulo o mName.data no está inicializado
     }
-    
+
     std::string nodeName(node->mName.data);
-    cout << node->mName.data << endl;
+    cout << "Node name: " << nodeName << endl; // Depuración
     const aiAnimation* animation = currentAnimation->GetAssimpAnimation();
 
-    // Encuentra el canal de animación correspondiente al nodo actual
+    if (!animation) return; // Verificación adicional de puntero nulo
+
     const aiNodeAnim* nodeAnim = nullptr;
     for (unsigned int i = 0; i < animation->mNumChannels; i++) {
         if (animation->mChannels[i]->mNodeName.data &&

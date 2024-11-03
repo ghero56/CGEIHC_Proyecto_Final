@@ -14,5 +14,7 @@ public:
         GLuint diffuseIntensityLocation, GLuint directionLocation);
 
     ~DirectionalLight();
+private:
+	
 };
 

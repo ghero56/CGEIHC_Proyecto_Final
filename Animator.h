@@ -11,6 +11,7 @@
 class Animator {
 public:
     Animator(Animation* animation);
+	Animator(std::vector<Animation*> animation);
     void UpdateAnimation(float deltaTime);
     void PlayAnimation(Animation* animation);
     std::vector<glm::mat4> GetFinalBoneMatrices();
@@ -18,7 +19,11 @@ public:
 private:
     void CalculateBoneTransform(const aiNode* node, glm::mat4 parentTransform);
 
-    Animation* currentAnimation;
+    std::vector<Animation*> animations;
+	Animation* currentAnimation;
+
+    int totalAnimations;
+
     float currentTime;
     std::vector<glm::mat4> finalBoneMatrices;
 

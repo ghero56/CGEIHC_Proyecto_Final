@@ -1,10 +1,10 @@
 #include "Camera.h"
 
 Camera::Camera(glm::vec3 startPosition, glm::vec3 startUp, GLfloat startYaw, GLfloat startPitch, GLfloat startMoveSpeed, GLfloat startTurnSpeed)
-		: position(startPosition), worldUp(startUp), yaw(startYaw), pitch(startPitch), moveSpeed(startMoveSpeed), turnSpeed(startTurnSpeed), front(0.0f, 0.0f, -1.0f) 
+		: position(startPosition), worldUp(startUp), yaw(startYaw), pitch(startPitch), moveSpeed(startMoveSpeed), turnSpeed(startTurnSpeed), front(0.0f, 0.0f, 0.0f) 
 {
 	update();  // Asegura que `front` se inicializa correctamente
-	Debug();
+	//Debug();
 }
 
 Camera::Camera() {
@@ -51,15 +51,13 @@ void Camera::scrollControl(GLfloat yChange, GLfloat deltaTime)
 {
 	// this just updates the speed of the camera
 	// debug
-	/*
 	moveSpeed += yChange * 0.05f;
-	if (moveSpeed < 0.05f) {
-		moveSpeed = 0.05f;
+	if (moveSpeed < 0.1f) {
+		moveSpeed = 0.1f;
 	}
-	if (moveSpeed > 1.0f) {
-		moveSpeed = 1.0f;
+	if (moveSpeed > 10.0f) {
+		moveSpeed = 10.0f;
 	}
-	*/
 }
 
 void Camera::mouseButtons(int* buttons)

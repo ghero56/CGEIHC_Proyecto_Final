@@ -18,18 +18,23 @@
 #include "include/stb/stb_image.h"
 #include "Animation.h"
 #include "Animator.h"
-
+#include "Light.h"
 
 using namespace std;
 
 class GameObject {
 public:
-    void Animate(float deltaTime);
-
     GameObject();
     GameObject(char*);
     GameObject(char* name, GameObject* parent);
-    ~GameObject();
+
+    // a gameObject can be also a kind of light
+	GameObject(char* name, Light* light);
+	GameObject(char* name, GameObject* parent, Light* light);
+
+    
+
+    void Animate(float deltaTime);
 
     // Funciones para configurar y obtener propiedades del objeto
     void SetPosition(const glm::vec3& position);
@@ -72,15 +77,22 @@ public:
 
     void EditorTools(bool hide);
 
-    bool HasAnimation() const {
-        return (animation != nullptr && animator != nullptr);
-    }
+    bool HasAnimation() const { return (animations.size() > 0); }
 
+    int GetNumAnimations() const { return animations.size(); }
+
+	void SetCurrentAnimation(int index) { if (index >= 0 && index < animations.size()) animator->PlayAnimation(animations[index]); }
+
+    void UseLight(GLuint , GLuint , GLuint , GLuint );
+
+    ~GameObject();
 
 private:
     // el animador y sus animaciones
-    Animation* animation;
+    vector<Animation*> animations;
     Animator* animator;	
+
+	Light* light;               // luz asociada al objeto
 
     bool selected;
     bool showGizmos;

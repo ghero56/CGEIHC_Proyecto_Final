@@ -1,3 +1,4 @@
+// Last update: 2024-02-11 Fernando Arciga
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <glm.hpp>
@@ -24,6 +25,7 @@
 #include "SpotLight.h"
 #include "Camera.h"
 #include <json.hpp>
+#include "COMMODO_VALUES.h"
 
 using namespace std;
 
@@ -36,8 +38,6 @@ static double limitFPS = 1.0 / 60.0;
 
 vector<GameObject*> gameObjects;
 vector<Mesh*> meshList;
-
-static char name[20] = "";
 
 void NewFrame() {
     GLfloat now = glfwGetTime();
@@ -87,25 +87,25 @@ void EditorTools(bool* demoWindow, ImGui::FileBrowser* fileDialog) {
         ImGui::ShowDemoWindow();
     }
 
-    // file explorer
-    if (ImGui::Begin("Project Explorer")) {
-        ImGui::InputTextWithHint("Nombre", "texto", name, IM_ARRAYSIZE(name));
-        if (ImGui::Button("explorador"))
-        {
+	// file explorer
+    if (true) {
+        ImGui::Begin("Project Explorer");
+        if (ImGui::Button("open file dialog"))
             fileDialog->Open();
-        }
     }
     ImGui::End();
 
     fileDialog->Display();
 
     // handle de los archivos
-    if (fileDialog->HasSelected())
-    {
+    if (fileDialog->HasSelected()) {
         cout << "Selected filename" << fileDialog->GetSelected().string() << std::endl;
-        char* nombre = _strdup(name);
-        gameObjects.push_back(new GameObject(nombre));
-        gameObjects[gameObjects.size() - 1]->CreateMesh(fileDialog->GetSelected().string().c_str());
+        //char* name;
+		// pop up que solicite el nombre para el gameobject
+        //ImGui::noseque("Ponle un nombre al nuevo objeto", &name)
+        // ese nombre se pasa como argumento
+		//gameObjects.push_back(new GameObject(name));
+		//gameObjects[gameObjects.size() - 1]->CreateMesh(fileDialog->GetSelected().string().c_str());
         fileDialog->ClearSelected();
     }
 }
@@ -177,12 +177,11 @@ int main(void) {
     imgui_io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 
     // Shader compilation
-    GLuint fragmentShader = LoadShader("Assets/Shaders/FragmentShader.glsl", GL_FRAGMENT_SHADER);
     GLuint vertexShader = LoadShader("Assets/Shaders/VertexShader.glsl", GL_VERTEX_SHADER);
+    GLuint fragmentShader = LoadShader("Assets/Shaders/FragmentShader.glsl", GL_FRAGMENT_SHADER);
     GLuint shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram, fragmentShader);
     glAttachShader(shaderProgram, vertexShader);
-    
+    glAttachShader(shaderProgram, fragmentShader);
     glLinkProgram(shaderProgram);
 
     // Verifica el programa
@@ -213,8 +212,6 @@ int main(void) {
     GLuint colorLoc = glGetUniformLocation(shaderProgram, "color");
     GLuint toffsetLoc = glGetUniformLocation(shaderProgram, "toffset");
 
-
-
 	// Directional Light
     GLuint dirAmbientIntensityLoc = glGetUniformLocation(shaderProgram, "directionalLight.base.ambientIntensity");
     GLuint dirColorLoc = glGetUniformLocation(shaderProgram, "directionalLight.base.color");
@@ -222,6 +219,7 @@ int main(void) {
     GLuint dirDirectionLoc = glGetUniformLocation(shaderProgram, "directionalLight.direction");
 
     glm::mat4 model = glm::mat4(1.0f);
+    // glm::mat4 view = glm::lookAt(glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     glm::mat4 projection = glm::perspective(glm::radians(45.0f), (GLfloat)window.getBufferWidth() / window.getBufferHeight(), 0.1f, 10000.0f);
     glm::mat4 lightSpaceMatrix = glm::mat4(1.0f);
 
@@ -234,31 +232,9 @@ int main(void) {
     // Crear y configurar el GameObject
     GameObject* tablero = new GameObject((char*)"Tablero");
     tablero->CreateMesh("Assets/Models/Tablero/tablero.obj");
-    
-	GameObject* aurora = new GameObject((char*)"Aurora");
-	aurora->CreateMesh("Assets/Models/Aurora/aurora.obj");
+    // tablero->SetScale(glm::vec3(.1f, .1f, .1f));
 
-
-	GameObject* pointLight = new GameObject((char*)"Point Light", new PointLight(
-		1.0f, 1.0f, 1.0f,
-        1.0f, 0.1f,
-        0.0f, 0.5f, 0.0f,
-		1.0f, 1.0f, 1.0f
-    ));
-
-	GameObject* spotLight = new GameObject((char*)"Spot Light", new SpotLight(
-		1.0f, 1.0f, 1.0f,
-		1.0f, 0.1f,
-		0.0f, 0.5f, 0.0f,
-		0.0f, -1.0f, 0.0f,
-		1.0f, 0.0f, 0.0f, 20.0f
-	));
-
-	GameObject* directionalLight = new GameObject((char*)"Directional Light", new DirectionalLight(
-		1.0f, 1.0f, 1.0f,
-		1.0f, 0.1f,
-		0.0f, -1.0f, 0.0f
-	));
+	GameObject* DirLight = new GameObject((char*)"Directional Light", new DirectionalLight(1.0f,1.0f,1.0f,0.5f,0.5f,0.0f,-1.0f,-0.2f));
 
     ImGui::FileBrowser fileDialog;
     bool demoWindow = true; // quitar
@@ -268,63 +244,84 @@ int main(void) {
 
 	glfwGetTime();
 	glfwSetTime(0.0);
-    
-    glm::vec3 color = glm::vec3(1.0f, 1.0f, 1.0f);
 
     while (!glfwWindowShouldClose(window.selfWindow)) {
         
         NewFrame();
-        
-        
-        glUseProgram(shaderProgram);
-        glActiveTexture(GL_TEXTURE0);
 
         if (EditorMode)     
             EditorTools(&demoWindow, &fileDialog);
 
-        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(camera.calculateViewMatrix()));
-        glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
-        glUniformMatrix4fv(lightSpaceMatrixLoc, 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix));
+        // Configura uniformes de la cámara
+        glUniform3fv(glGetUniformLocation(shaderProgram, "eyePosition"), 1, glm::value_ptr(camera.Position));
+
+        // Configura las matrices de transformación
+        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
+        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, glm::value_ptr(viewMatrix));
+        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projectionMatrix));
+
+        // Configura la luz direccional
+        glUniform3fv(glGetUniformLocation(shaderProgram, "directionalLight.base.color"), 1, glm::value_ptr(directionalLight.color));
+        glUniform1f(glGetUniformLocation(shaderProgram, "directionalLight.base.ambientIntensity"), directionalLight.ambientIntensity);
+        glUniform1f(glGetUniformLocation(shaderProgram, "directionalLight.base.diffuseIntensity"), directionalLight.diffuseIntensity);
+        glUniform3fv(glGetUniformLocation(shaderProgram, "directionalLight.direction"), 1, glm::value_ptr(directionalLight.direction));
+
+        // Configura las luces puntuales
+        glUniform1i(glGetUniformLocation(shaderProgram, "pointLightCount"), pointLightCount);
+        for (int i = 0; i < pointLightCount; ++i) {
+            std::string baseName = "pointLights[" + std::to_string(i) + "].";
+            glUniform3fv(glGetUniformLocation(shaderProgram, (baseName + "base.color").c_str()), 1, glm::value_ptr(pointLights[i].color));
+            glUniform1f(glGetUniformLocation(shaderProgram, (baseName + "base.ambientIntensity").c_str()), pointLights[i].ambientIntensity);
+            glUniform1f(glGetUniformLocation(shaderProgram, (baseName + "base.diffuseIntensity").c_str()), pointLights[i].diffuseIntensity);
+            glUniform3fv(glGetUniformLocation(shaderProgram, (baseName + "position").c_str()), 1, glm::value_ptr(pointLights[i].position));
+            glUniform1f(glGetUniformLocation(shaderProgram, (baseName + "constant").c_str()), pointLights[i].constant);
+            glUniform1f(glGetUniformLocation(shaderProgram, (baseName + "linear").c_str()), pointLights[i].linear);
+            glUniform1f(glGetUniformLocation(shaderProgram, (baseName + "exponent").c_str()), pointLights[i].exponent);
+        }
+
+        // Configura las luces spot
+        glUniform1i(glGetUniformLocation(shaderProgram, "spotLightCount"), spotLightCount);
+        for (int i = 0; i < spotLightCount; ++i) {
+            std::string baseName = "spotLights[" + std::to_string(i) + "].";
+            glUniform3fv(glGetUniformLocation(shaderProgram, (baseName + "base.base.color").c_str()), 1, glm::value_ptr(spotLights[i].color));
+            glUniform1f(glGetUniformLocation(shaderProgram, (baseName + "base.base.ambientIntensity").c_str()), spotLights[i].ambientIntensity);
+            glUniform1f(glGetUniformLocation(shaderProgram, (baseName + "base.base.diffuseIntensity").c_str()), spotLights[i].diffuseIntensity);
+            glUniform3fv(glGetUniformLocation(shaderProgram, (baseName + "base.position").c_str()), 1, glm::value_ptr(spotLights[i].position));
+            glUniform1f(glGetUniformLocation(shaderProgram, (baseName + "base.constant").c_str()), spotLights[i].constant);
+            glUniform1f(glGetUniformLocation(shaderProgram, (baseName + "base.linear").c_str()), spotLights[i].linear);
+            glUniform1f(glGetUniformLocation(shaderProgram, (baseName + "base.exponent").c_str()), spotLights[i].exponent);
+            glUniform3fv(glGetUniformLocation(shaderProgram, (baseName + "direction").c_str()), 1, glm::value_ptr(spotLights[i].direction));
+            glUniform1f(glGetUniformLocation(shaderProgram, (baseName + "edge").c_str()), spotLights[i].edge);
+        }
+
+        // Configura el material
+        glUniform1f(glGetUniformLocation(shaderProgram, "material.specularIntensity"), material.specularIntensity);
+        glUniform1f(glGetUniformLocation(shaderProgram, "material.shininess"), material.shininess);
+
+        // Configura la textura
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture);
+        glUniform1i(glGetUniformLocation(shaderProgram, "theTexture"), 0); 
         
-        glUniform3fv(colorLoc, 1, glm::value_ptr(color));
         // Directional Light
-		directionalLight->UseLight(dirAmbientIntensityLoc, dirColorLoc, dirDiffuseIntensityLoc, dirDirectionLoc);
-        pointLight->UseLight(dirAmbientIntensityLoc, dirColorLoc, dirDiffuseIntensityLoc, dirDirectionLoc);
-		spotLight->UseLight(dirAmbientIntensityLoc, dirColorLoc, dirDiffuseIntensityLoc, dirDirectionLoc);
+		DirLight->UseLight(dirAmbientIntensityLoc, dirColorLoc, dirDiffuseIntensityLoc, dirDirectionLoc);
         
-		/*model = glm::mat4(1.0f);
+        // Renderización del GameObject
+        glUseProgram(shaderProgram);
+		model = glm::mat4(1.0f);
 		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
         glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-        meshList[0]->RenderMesh();*/
-
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(aurora->GetModelMatrix()));
-		aurora->Render();
-		aurora->EditorTools(!EditorMode);
+        meshList[0]->RenderMesh();
 
 		// Renderización del GameObject
-        if (aurora->HasAnimation()) {
+        /*if (aurora->HasAnimation()) {
             aurora->Animate(deltaTime);
             glUniformMatrix4fv(boneTransformsLoc, aurora->GetBoneTransforms().size(), GL_FALSE, glm::value_ptr(aurora->GetBoneTransforms()[0]));
-        }
-
-        if (!gameObjects.empty())
-        {
-            for (auto& gameObject : gameObjects)
-            {
-                // Actualizar la matriz de modelo en el shader
-                glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(gameObject->GetModelMatrix()));
-
-                // Renderizar el objeto
-                gameObject->Render();
-
-                // Herramientas de edición (pasando el modo de edición como parámetro)
-                gameObject->EditorTools(!EditorMode);
-            }
-        }
+        }*/
 
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(tablero->GetModelMatrix()));
         tablero->Render();
-        tablero->EditorTools(!EditorMode);
+        // tablero->EditorTools(!EditorMode);
 
         EndOfFrame(window.selfWindow);
     }
