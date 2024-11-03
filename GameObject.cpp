@@ -1,4 +1,5 @@
 #include "GameObject.h"
+#include <jsoncons/json_encoder.hpp>
 #include "glm/gtc/matrix_transform.hpp"
 #include <glm/gtc/quaternion.hpp> // Incluir las funciones de cuaterniones
 #include <algorithm>
@@ -375,4 +376,9 @@ void GameObject::EditorTools(bool hide){
 	ImGui::EndChildFrame();
 
 	ImGui::End();
+}
+
+template<class Archive>
+void GameObject::Serialize(Archive& archive) {
+    archive(selected,showGizmos,showBoundingBox,showWireframe,showNormals,showBones,showSkeleton,showSkeletonJoints,showSkeletonBones,showSkeletonNames,showSkeletonWeights,bindScale,name);
 }

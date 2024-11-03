@@ -25,10 +25,14 @@
 #include "Camera.h"
 #include <json.hpp>
 
+#include <cereal/archives/json.hpp>
+#include<fstream>
+
 using namespace std;
 
 
-
+int serilizedModels = 0;
+bool serialize=false;
 Window window;
 Camera camera;
 
@@ -67,7 +71,21 @@ void EndOfFrame(GLFWwindow* wind) {
 	window.SwapBuffers();
 }
 
+void SerializeObjects() {
+    if (serialize) {
+        std::ofstream stream("./Assets/scene.json");
+        cereal::BinaryOutputArchive oarchive(stream);
+
+        for (GameObject* obj : gameObjects) {
+            oarchive(obj);
+        }
+    }
+    else {
+    }
+}
+
 void ExitCleanup() {
+    SerializeObjects();
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
@@ -94,6 +112,13 @@ void EditorTools(bool* demoWindow, ImGui::FileBrowser* fileDialog) {
             fileDialog->Open();
     }
     ImGui::End();
+
+    ImGui::Begin("Bool para el editor");
+    ImGui::Text("Serializar objetos o no");
+    ImGui::Checkbox("serialize", &serialize);
+    ImGui::End();
+
+
 
     fileDialog->Display();
 
@@ -224,9 +249,28 @@ int main(void) {
     glUniformMatrix4fv(lightSpaceMatrixLoc, 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix));
 
     // Crear y configurar el GameObject
+    
+    
+    
     GameObject* aurora = new GameObject((char*)"Aurora LOL");
     aurora->CreateMesh("Assets/Models/aurora.glb");
     aurora->SetScale(glm::vec3(.1f, .1f, .1f));
+    gameObjects.push_back(aurora);
+
+    GameObject* momo = new GameObject((char*)"Momo Avatar");
+    momo->CreateMesh("Assets/Models/momo.fbx");
+    gameObjects.push_back(momo);
+    
+
+    
+    /*GameObject* aurora = new GameObject((char*)"Aurora LOL");
+    aurora->CreateMesh("Assets/Models/aurora.glb");
+    aurora->SetScale(glm::vec3(.1f, .1f, .1f));
+    gameObjects.push_back(aurora);
+
+    GameObject* momo = new GameObject((char*)"Momo Avatar");
+    momo->CreateMesh("Assets/Models/momo.fbx");
+    gameObjects.push_back(momo);*/
 
     ImGui::FileBrowser fileDialog;
     bool demoWindow = true; // quitar
@@ -257,18 +301,22 @@ int main(void) {
 
 
 		// Renderización del GameObject
-        if (aurora->HasAnimation()) {
+        /*if (aurora->HasAnimation()) {
             aurora->Animate(deltaTime);
             glUniformMatrix4fv(boneTransformsLoc, aurora->GetBoneTransforms().size(), GL_FALSE, glm::value_ptr(aurora->GetBoneTransforms()[0]));
+        }*/
+
+
+        for (GameObject* objeto : gameObjects) {
+            glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(objeto->GetModelMatrix()));
+            objeto->Render();
+            objeto->EditorTools(!EditorMode);
         }
 
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(aurora->GetModelMatrix()));
-        aurora->Render();
-        aurora->EditorTools(!EditorMode);
 
         EndOfFrame(window.selfWindow);
     }
-
+    //aurora->Serialize();
     ExitCleanup();
     return 0;
 }

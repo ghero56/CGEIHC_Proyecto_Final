@@ -7,6 +7,15 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 #include <iostream>
+
+#include <jsoncons/json_cursor.hpp>
+#include <jsoncons/json_encoder.hpp>
+#include <fstream>
+#include <cassert>
+
+#include<cereal/archives/binary.hpp>
+#include<cereal/CinderCereal.h>
+
 #include <vector>
 #include <string>
 #include <fmod.hpp>
@@ -75,6 +84,11 @@ public:
     bool HasAnimation() const {
         return (animation != nullptr && animator != nullptr);
     }
+    
+    template<class Archive>
+    void Serialize(Archive& archive);
+
+    void setName(char* name) { this->name = name; }
 
 
 private:
