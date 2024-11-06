@@ -7,15 +7,9 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 #include <iostream>
-
-#include <jsoncons/json_cursor.hpp>
 #include <jsoncons/json_encoder.hpp>
 #include <fstream>
 #include <cassert>
-
-#include<cereal/archives/binary.hpp>
-#include<cereal/CinderCereal.h>
-
 #include <vector>
 #include <string>
 #include <fmod.hpp>
@@ -56,7 +50,7 @@ public:
     void CreateMesh(GLfloat* vertices, unsigned int* indices, unsigned int numOfVertices, unsigned int numOfIndices);
     void CreateMesh(const std::string& filename);
 
-    // Animación
+    // Animaciï¿½n
     void SetBoneTransforms(const std::vector<glm::mat4>& transforms);
     const std::vector<glm::mat4>& GetBoneTransforms() const;
 
@@ -64,7 +58,7 @@ public:
     void AddChild(GameObject* child);
     void RemoveChild(GameObject* child);
 
-    // Renderización y actualización
+    // Renderizaciï¿½n y actualizaciï¿½n
     void Update(float deltaTime);
     void Render();
 
@@ -91,6 +85,12 @@ public:
     void setName(char* name) { this->name = name; }
 
 
+    void UseLight(GLuint , GLuint , GLuint , GLuint );
+
+    void Serialize(int posis);
+
+    ~GameObject();
+
 private:
     // el animador y sus animaciones
     Animation* animation;
@@ -109,23 +109,23 @@ private:
     bool showSkeletonWeights;
     bool bindScale;
 
-    bool showSelfWindow;         // imgui self window para ver sus características al seleccionarlo
+    bool showSelfWindow;         // imgui self window para ver sus caracterï¿½sticas al seleccionarlo
 
     FMOD::System* soundSystem;   // generador de sonido
     FMOD::Sound* sound;          // sonido
     FMOD::Channel* channel;      // canal de sonido
 
-    glm::mat4 model;            // matriz de transformación
-    glm::vec3 position;         // posición en el mundo
-    glm::vec3 rotation;         // rotación
+    glm::mat4 model;            // matriz de transformaciï¿½n
+    glm::vec3 position;         // posiciï¿½n en el mundo
+    glm::vec3 rotation;         // rotaciï¿½n
     glm::vec3 scale;            // escala
 
     GameObject* parent;          // padre (puede ser nullptr)
 
-    vector<GameObject*> children; // hijos (puede estar vacío el vector)
+    vector<GameObject*> children; // hijos (puede estar vacï¿½o el vector)
     vector<Texture*> textureList;
     vector<Mesh*> mesh;                 // meshes o modelos 3D
-    vector<unsigned int> materialFaces;     // índices de los meshes
+    vector<unsigned int> materialFaces;     // ï¿½ndices de los meshes
     vector<glm::mat4> boneTransforms; // transformaciones de huesos para animaciones
 
 	char* name;                // nombre del objeto

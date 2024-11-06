@@ -69,14 +69,14 @@ GameObject::~GameObject() {
 
 void GameObject::SetPosition(const glm::vec3& newPosition) {
     position = newPosition;
-    // Actualiza la matriz de modelo cuando la posición cambia
+    // Actualiza la matriz de modelo cuando la posiciï¿½n cambia
     model = glm::translate(glm::mat4(1.0f), position) * glm::mat4_cast(glm::quat(rotation)) * glm::scale(glm::mat4(1.0f), scale);
     // model = glm::translate(model, position);
 }
 
 void GameObject::SetRotation(const glm::vec3& newRotation) {
     rotation = newRotation;
-    // Actualiza la matriz de modelo cuando la rotación cambia
+    // Actualiza la matriz de modelo cuando la rotaciï¿½n cambia
     model = glm::translate(glm::mat4(1.0f), position) * glm::mat4_cast(glm::quat(rotation)) * glm::scale(glm::mat4(1.0f), scale);
 }
 
@@ -157,7 +157,7 @@ void GameObject::RemoveChild(GameObject* child) {
 }
 
 void GameObject::Update(float deltaTime) {
-    // Actualiza la lógica del objeto aquí
+    // Actualiza la lï¿½gica del objeto aquï¿½
     for (auto& child : children) {
         child->Update(deltaTime);
     }
@@ -263,16 +263,16 @@ void GameObject::LoadMaterials(const aiScene* scene) {
                     }
 
                     if (imageData) {
-                        std::cout << "\tAñadiendo textura embebida" << std::endl;
+                        std::cout << "\tAï¿½adiendo textura embebida" << std::endl;
                         textureList[i] = new Texture(imageData, width, height, channels);
                         if (!textureList[i]->LoadTexture(true, true)) {
-                            std::cout << "\tFalló en cargar la Textura" << std::endl;
+                            std::cout << "\tFallï¿½ en cargar la Textura" << std::endl;
                             delete textureList[i];
                             textureList[i] = nullptr;
                         }
                     }
                     else {
-                        std::cout << "Falló en cargar la Textura embebida" << std::endl;
+                        std::cout << "Fallï¿½ en cargar la Textura embebida" << std::endl;
                     }
                 }
                 else {
@@ -282,7 +282,7 @@ void GameObject::LoadMaterials(const aiScene* scene) {
                     std::string texPath = "Assets/Textures/" + filename;
                     textureList[i] = new Texture(texPath.c_str());
                     if (!textureList[i]->LoadTexture(filename.find("tga") != std::string::npos || filename.find("png") != std::string::npos, false)) {
-                        std::cout << "Falló en cargar la Textura: " << texPath << std::endl;
+                        std::cout << "Fallï¿½ en cargar la Textura: " << texPath << std::endl;
                         delete textureList[i];
                         textureList[i] = nullptr;
                     }
@@ -381,4 +381,113 @@ void GameObject::EditorTools(bool hide){
 template<class Archive>
 void GameObject::Serialize(Archive& archive) {
     archive(selected,showGizmos,showBoundingBox,showWireframe,showNormals,showBones,showSkeleton,showSkeletonJoints,showSkeletonBones,showSkeletonNames,showSkeletonWeights,bindScale,name);
+}
+
+void GameObject::Serialize(int posis) {
+    if (children.size() > 0){
+        for (GameObject* child : children) {
+            child->Serialize(posis);
+            posis++;
+        }
+    }
+
+    
+    std::ofstream serialFile("./Assets/scene.json", std::ios_base::out | std::ios_base::app);
+    assert(serialFile);
+    jsoncons::compact_json_stream_encoder encoder(serialFile);
+
+    encoder.begin_object();
+        encoder.key("name");
+            encoder.string_value(name);
+        encoder.key("model");
+            encoder.begin_array();
+                encoder.begin_array();
+                    encoder.double_value(model[0].x);
+                    encoder.double_value(model[0].y);
+                    encoder.double_value(model[0].z);
+                encoder.end_array();
+                encoder.begin_array();
+                    encoder.double_value(model[1].x);
+                    encoder.double_value(model[1].y);
+                    encoder.double_value(model[1].z);
+                encoder.end_array();
+                encoder.begin_array();
+                    encoder.double_value(model[2].x);
+                    encoder.double_value(model[2].y);
+                    encoder.double_value(model[2].z);
+                encoder.end_array();
+                encoder.begin_array();
+                    encoder.double_value(model[3].x);
+                    encoder.double_value(model[3].y);
+                    encoder.double_value(model[3].z);
+                encoder.end_array();
+            encoder.end_array();
+        encoder.key("position");
+            encoder.begin_array();
+                encoder.double_value(position.x);
+                encoder.double_value(position.y);
+                encoder.double_value(position.z);
+            encoder.end_array();
+        encoder.key("rotation");
+            encoder.begin_array();
+                encoder.double_value(rotation.x);
+                encoder.double_value(rotation.y);
+                encoder.double_value(rotation.z);
+            encoder.end_array();
+        encoder.key("scale");
+            encoder.begin_array();
+                encoder.double_value(scale.x);
+                encoder.double_value(scale.y);
+                encoder.double_value(scale.z);
+            encoder.end_array();
+        encoder.key("selected");
+            encoder.bool_value(selected);
+        encoder.key("showGizmos");
+            encoder.bool_value(showGizmos);
+        encoder.key("showBoundingBox");
+            encoder.bool_value(showBoundingBox);
+        encoder.key("showWireframe");
+            encoder.bool_value(showWireframe);
+        encoder.key("showNormals");
+            encoder.bool_value(showNormals);
+        encoder.key("showBones");
+            encoder.bool_value(showBones);
+        encoder.key("showSkeleton");
+            encoder.bool_value(showSkeleton);
+        encoder.key("showSkeletonJoints");
+            encoder.bool_value(showSkeletonJoints);
+        encoder.key("showSkeletonBones");
+            encoder.bool_value(showSkeletonBones);
+        encoder.key("showSkeletonNames");
+            encoder.bool_value(showSkeletonNames);
+        encoder.key("showSkeletonWeights");
+            encoder.bool_value(showSkeletonWeights);
+        encoder.key("bindScale");
+            encoder.bool_value(bindScale);
+        encoder.key("parent");
+            if (parent != nullptr)
+            {
+                encoder.string_value(parent->name);
+            }
+            else {
+                encoder.null_value();
+            }
+        encoder.key("children");
+            if (children.size() > 0)
+            {
+                encoder.begin_array();
+                for (GameObject* child : children) {
+                    encoder.string_value(child->name);
+                }
+                encoder.end_array();
+            }
+            else {
+                encoder.null_value();
+            }
+    encoder.end_object();
+    if (posis != 0) {
+        serialFile << ",";
+    }
+    encoder.flush();
+    serialFile.close();
 }

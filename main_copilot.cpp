@@ -43,6 +43,9 @@ static double limitFPS = 1.0 / 60.0;
 vector<GameObject*> gameObjects;
 vector<Mesh*> meshList;
 
+static char name[20] = "";
+int posis = 0;
+
 void NewFrame() {
     GLfloat now = glfwGetTime();
     deltaTime = now - lastTime;
@@ -71,21 +74,22 @@ void EndOfFrame(GLFWwindow* wind) {
 	window.SwapBuffers();
 }
 
-void SerializeObjects() {
-    if (serialize) {
-        std::ofstream stream("./Assets/scene.json");
-        cereal::BinaryOutputArchive oarchive(stream);
-
-        for (GameObject* obj : gameObjects) {
-            oarchive(obj);
-        }
+void Serialize() {
+    std::ofstream serialFile("./Assets/scene.json", std::ios_base::out | std::ios_base::trunc);
+    assert(serialFile);
+    serialFile << "[";
+    serialFile.close();
+    for (GameObject* obj : gameObjects) {
+        obj->Serialize(posis);
+        posis++;
     }
-    else {
-    }
+    serialFile.open("./Assets/scene.json", std::ios_base::out | std::ios_base::app);
+    serialFile << "]";
+    serialFile.close();
 }
 
 void ExitCleanup() {
-    SerializeObjects();
+    Serialize();
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
@@ -218,17 +222,17 @@ int main(void) {
 		cout << "Error al compilar el programa de shaders: " << infoLog << endl;
     }
 
-    // Eliminar los shaders ahora que están vinculados al programa
+    // Eliminar los shaders ahora que estï¿½n vinculados al programa
     //glDeleteShader(vertexShader);
     //glDeleteShader(fragmentShader);
 
     // Usar el programa de shaders antes de setear uniformes
     // glUseProgram(shaderProgram);
 
-    // inicialización de la camara
+    // inicializaciï¿½n de la camara
     camera = Camera(glm::vec3(0.0f, 3.0f, 10.0f), glm::vec3(0.0f, 1.0f, 0.0f), -60.0f, 0.0f, 10.0f, 0.5f);
 
-    // Inicialización de uniforms
+    // Inicializaciï¿½n de uniforms
     GLuint modelLoc = glGetUniformLocation(shaderProgram, "model");
     GLuint viewLoc = glGetUniformLocation(shaderProgram, "view");
     GLuint projectionLoc = glGetUniformLocation(shaderProgram, "projection");
@@ -249,6 +253,9 @@ int main(void) {
     glUniformMatrix4fv(lightSpaceMatrixLoc, 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix));
 
     // Crear y configurar el GameObject
+    GameObject* tablero = new GameObject((char*)"Tablero");
+    tablero->CreateMesh("Assets/Models/Tablero/tablero.obj");
+
     
     
     
@@ -262,11 +269,13 @@ int main(void) {
     gameObjects.push_back(momo);
     
 
-    
-    /*GameObject* aurora = new GameObject((char*)"Aurora LOL");
-    aurora->CreateMesh("Assets/Models/aurora.glb");
-    aurora->SetScale(glm::vec3(.1f, .1f, .1f));
-    gameObjects.push_back(aurora);
+
+	GameObject* pointLight = new GameObject((char*)"Point Light", new PointLight(
+		1.0f, 1.0f, 1.0f,
+        1.0f, 0.1f,
+        0.0f, 0.5f, 0.0f,
+		1.0f, 1.0f, 1.0f
+    ));
 
     GameObject* momo = new GameObject((char*)"Momo Avatar");
     momo->CreateMesh("Assets/Models/momo.fbx");
@@ -292,7 +301,7 @@ int main(void) {
         glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
         glUniformMatrix4fv(lightSpaceMatrixLoc, 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix));
 
-        // Renderización del GameObject
+        // Renderizaciï¿½n del GameObject
         glUseProgram(shaderProgram);
 		model = glm::mat4(1.0f);
 		model = glm::translate(model, glm::vec3(0.0f, 3.0f, -5.0f));
@@ -300,17 +309,21 @@ int main(void) {
         meshList[0]->RenderMesh();
 
 
-		// Renderización del GameObject
+		// Renderizaciï¿½n del GameObject
         /*if (aurora->HasAnimation()) {
             aurora->Animate(deltaTime);
             glUniformMatrix4fv(boneTransformsLoc, aurora->GetBoneTransforms().size(), GL_FALSE, glm::value_ptr(aurora->GetBoneTransforms()[0]));
         }*/
 
 
-        for (GameObject* objeto : gameObjects) {
-            glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(objeto->GetModelMatrix()));
-            objeto->Render();
-            objeto->EditorTools(!EditorMode);
+                // Renderizar el objeto
+                gameObject->Render();
+
+                // Herramientas de ediciï¿½n (pasando el modo de ediciï¿½n como parï¿½metro)
+                gameObject->EditorTools(!EditorMode);
+
+                gameObjects.push_back(gameObject);
+            }
         }
 
 
