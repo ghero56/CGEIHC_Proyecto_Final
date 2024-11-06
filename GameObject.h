@@ -88,13 +88,10 @@ public:
 
     void UseLight(GLuint , GLuint , GLuint , GLuint );
 
-    ~GameObject();
-
-    void UseLight(GLuint , GLuint , GLuint , GLuint );
-
     void Serialize(int posis);
 
     ~GameObject();
+
 
 private:
     // el animador y sus animaciones

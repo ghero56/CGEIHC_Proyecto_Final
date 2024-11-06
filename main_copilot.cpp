@@ -76,7 +76,7 @@ void Serialize() {
     assert(serialFile);
     serialFile << "[";
     serialFile.close();
-    for (GameObject* obj : gameObjects) {
+    for (auto& obj : gameObjects) {
         obj->Serialize(posis);
         posis++;
     }
@@ -258,9 +258,11 @@ int main(void) {
 
     // Crear y configurar el GameObject
     GameObject* tablero = new GameObject((char*)"Tablero");
+    gameObjects.push_back(tablero);
     tablero->CreateMesh("Assets/Models/Tablero/tablero.obj");
     
 	GameObject* aurora = new GameObject((char*)"Aurora");
+    gameObjects.push_back(aurora);
 	aurora->CreateMesh("Assets/Models/Aurora/aurora.obj");
 
 
@@ -326,22 +328,15 @@ int main(void) {
 		aurora->Render();
 		aurora->EditorTools(!EditorMode);
 
-		// Renderizaci�n del GameObject
-        /*if (aurora->HasAnimation()) {
+		
+
+        // Renderizaci�n del GameObject
+        if (aurora->HasAnimation()) {
             aurora->Animate(deltaTime);
             glUniformMatrix4fv(boneTransformsLoc, aurora->GetBoneTransforms().size(), GL_FALSE, glm::value_ptr(aurora->GetBoneTransforms()[0]));
-        }*/
-
-
-                // Renderizar el objeto
-                gameObject->Render();
-
-                // Herramientas de edici�n (pasando el modo de edici�n como par�metro)
-                gameObject->EditorTools(!EditorMode);
-
-                gameObjects.push_back(gameObject);
-            }
         }
+        
+
 
         if (!gameObjects.empty())
         {
@@ -349,6 +344,8 @@ int main(void) {
             {
                 // Actualizar la matriz de modelo en el shader
                 glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(gameObject->GetModelMatrix()));
+
+                //gameObjects.push_back(gameObject);
 
                 // Renderizar el objeto
                 gameObject->Render();
