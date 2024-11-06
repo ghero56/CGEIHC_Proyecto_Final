@@ -7,15 +7,9 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 #include <iostream>
-
-#include <jsoncons/json_cursor.hpp>
 #include <jsoncons/json_encoder.hpp>
 #include <fstream>
 #include <cassert>
-
-#include<cereal/archives/binary.hpp>
-#include<cereal/CinderCereal.h>
-
 #include <vector>
 #include <string>
 #include <fmod.hpp>
@@ -93,6 +87,12 @@ public:
 	void SetCurrentAnimation(int index) { if (index >= 0 && index < animations.size()) animator->PlayAnimation(animations[index]); }
 
     void UseLight(GLuint , GLuint , GLuint , GLuint );
+
+    ~GameObject();
+
+    void UseLight(GLuint , GLuint , GLuint , GLuint );
+
+    void Serialize(int posis);
 
     ~GameObject();
 

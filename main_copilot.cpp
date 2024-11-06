@@ -41,6 +41,7 @@ vector<GameObject*> gameObjects;
 vector<Mesh*> meshList;
 
 static char name[20] = "";
+int posis = 0;
 
 void NewFrame() {
     GLfloat now = glfwGetTime();
@@ -70,11 +71,22 @@ void EndOfFrame(GLFWwindow* wind) {
 	window.SwapBuffers();
 }
 
-void SerializeObjects() {
+void Serialize() {
+    std::ofstream serialFile("./Assets/scene.json", std::ios_base::out | std::ios_base::trunc);
+    assert(serialFile);
+    serialFile << "[";
+    serialFile.close();
+    for (GameObject* obj : gameObjects) {
+        obj->Serialize(posis);
+        posis++;
+    }
+    serialFile.open("./Assets/scene.json", std::ios_base::out | std::ios_base::app);
+    serialFile << "]";
+    serialFile.close();
 }
 
 void ExitCleanup() {
-    SerializeObjects();
+    Serialize();
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
@@ -321,10 +333,14 @@ int main(void) {
         }*/
 
 
-        for (GameObject* objeto : gameObjects) {
-            glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(objeto->GetModelMatrix()));
-            objeto->Render();
-            objeto->EditorTools(!EditorMode);
+                // Renderizar el objeto
+                gameObject->Render();
+
+                // Herramientas de edici�n (pasando el modo de edici�n como par�metro)
+                gameObject->EditorTools(!EditorMode);
+
+                gameObjects.push_back(gameObject);
+            }
         }
 
         if (!gameObjects.empty())

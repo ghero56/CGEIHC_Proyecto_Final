@@ -422,3 +422,112 @@ GameObject::~GameObject() {
         parent->RemoveChild(this);
     }
 }
+
+void GameObject::Serialize(int posis) {
+    if (children.size() > 0){
+        for (GameObject* child : children) {
+            child->Serialize(posis);
+            posis++;
+        }
+    }
+
+    
+    std::ofstream serialFile("./Assets/scene.json", std::ios_base::out | std::ios_base::app);
+    assert(serialFile);
+    jsoncons::compact_json_stream_encoder encoder(serialFile);
+
+    encoder.begin_object();
+        encoder.key("name");
+            encoder.string_value(name);
+        encoder.key("model");
+            encoder.begin_array();
+                encoder.begin_array();
+                    encoder.double_value(model[0].x);
+                    encoder.double_value(model[0].y);
+                    encoder.double_value(model[0].z);
+                encoder.end_array();
+                encoder.begin_array();
+                    encoder.double_value(model[1].x);
+                    encoder.double_value(model[1].y);
+                    encoder.double_value(model[1].z);
+                encoder.end_array();
+                encoder.begin_array();
+                    encoder.double_value(model[2].x);
+                    encoder.double_value(model[2].y);
+                    encoder.double_value(model[2].z);
+                encoder.end_array();
+                encoder.begin_array();
+                    encoder.double_value(model[3].x);
+                    encoder.double_value(model[3].y);
+                    encoder.double_value(model[3].z);
+                encoder.end_array();
+            encoder.end_array();
+        encoder.key("position");
+            encoder.begin_array();
+                encoder.double_value(position.x);
+                encoder.double_value(position.y);
+                encoder.double_value(position.z);
+            encoder.end_array();
+        encoder.key("rotation");
+            encoder.begin_array();
+                encoder.double_value(rotation.x);
+                encoder.double_value(rotation.y);
+                encoder.double_value(rotation.z);
+            encoder.end_array();
+        encoder.key("scale");
+            encoder.begin_array();
+                encoder.double_value(scale.x);
+                encoder.double_value(scale.y);
+                encoder.double_value(scale.z);
+            encoder.end_array();
+        encoder.key("selected");
+            encoder.bool_value(selected);
+        encoder.key("showGizmos");
+            encoder.bool_value(showGizmos);
+        encoder.key("showBoundingBox");
+            encoder.bool_value(showBoundingBox);
+        encoder.key("showWireframe");
+            encoder.bool_value(showWireframe);
+        encoder.key("showNormals");
+            encoder.bool_value(showNormals);
+        encoder.key("showBones");
+            encoder.bool_value(showBones);
+        encoder.key("showSkeleton");
+            encoder.bool_value(showSkeleton);
+        encoder.key("showSkeletonJoints");
+            encoder.bool_value(showSkeletonJoints);
+        encoder.key("showSkeletonBones");
+            encoder.bool_value(showSkeletonBones);
+        encoder.key("showSkeletonNames");
+            encoder.bool_value(showSkeletonNames);
+        encoder.key("showSkeletonWeights");
+            encoder.bool_value(showSkeletonWeights);
+        encoder.key("bindScale");
+            encoder.bool_value(bindScale);
+        encoder.key("parent");
+            if (parent != nullptr)
+            {
+                encoder.string_value(parent->name);
+            }
+            else {
+                encoder.null_value();
+            }
+        encoder.key("children");
+            if (children.size() > 0)
+            {
+                encoder.begin_array();
+                for (GameObject* child : children) {
+                    encoder.string_value(child->name);
+                }
+                encoder.end_array();
+            }
+            else {
+                encoder.null_value();
+            }
+    encoder.end_object();
+    if (posis != 0) {
+        serialFile << ",";
+    }
+    encoder.flush();
+    serialFile.close();
+}
