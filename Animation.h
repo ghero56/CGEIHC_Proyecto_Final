@@ -7,6 +7,7 @@
 class Animation {
 public:
     Animation(const std::string& filePath, const aiScene* scene);
+	Animation(const aiAnimation* animation);
     ~Animation();
 
     const aiAnimation* GetAssimpAnimation() const;

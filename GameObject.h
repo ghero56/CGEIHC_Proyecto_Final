@@ -27,18 +27,23 @@
 #include "include/stb/stb_image.h"
 #include "Animation.h"
 #include "Animator.h"
-
+#include "Light.h"
 
 using namespace std;
 
 class GameObject {
 public:
-    void Animate(float deltaTime);
-
     GameObject();
     GameObject(char*);
     GameObject(char* name, GameObject* parent);
-    ~GameObject();
+
+    // a gameObject can be also a kind of light
+	GameObject(char* name, Light* light);
+	GameObject(char* name, GameObject* parent, Light* light);
+
+    
+
+    void Animate(float deltaTime);
 
     // Funciones para configurar y obtener propiedades del objeto
     void SetPosition(const glm::vec3& position);
@@ -56,7 +61,7 @@ public:
     void CreateMesh(GLfloat* vertices, unsigned int* indices, unsigned int numOfVertices, unsigned int numOfIndices);
     void CreateMesh(const std::string& filename);
 
-    // Animación
+    // Animaciï¿½n
     void SetBoneTransforms(const std::vector<glm::mat4>& transforms);
     const std::vector<glm::mat4>& GetBoneTransforms() const;
 
@@ -64,7 +69,7 @@ public:
     void AddChild(GameObject* child);
     void RemoveChild(GameObject* child);
 
-    // Renderización y actualización
+    // Renderizaciï¿½n y actualizaciï¿½n
     void Update(float deltaTime);
     void Render();
 
@@ -81,20 +86,22 @@ public:
 
     void EditorTools(bool hide);
 
-    bool HasAnimation() const {
-        return (animation != nullptr && animator != nullptr);
-    }
-    
-    template<class Archive>
-    void Serialize(Archive& archive);
+    bool HasAnimation() const { return (animations.size() > 0); }
 
-    void setName(char* name) { this->name = name; }
+    int GetNumAnimations() const { return animations.size(); }
 
+	void SetCurrentAnimation(int index) { if (index >= 0 && index < animations.size()) animator->PlayAnimation(animations[index]); }
+
+    void UseLight(GLuint , GLuint , GLuint , GLuint );
+
+    ~GameObject();
 
 private:
     // el animador y sus animaciones
-    Animation* animation;
+    vector<Animation*> animations;
     Animator* animator;	
+
+	Light* light;               // luz asociada al objeto
 
     bool selected;
     bool showGizmos;
@@ -109,23 +116,23 @@ private:
     bool showSkeletonWeights;
     bool bindScale;
 
-    bool showSelfWindow;         // imgui self window para ver sus características al seleccionarlo
+    bool showSelfWindow;         // imgui self window para ver sus caracterï¿½sticas al seleccionarlo
 
     FMOD::System* soundSystem;   // generador de sonido
     FMOD::Sound* sound;          // sonido
     FMOD::Channel* channel;      // canal de sonido
 
-    glm::mat4 model;            // matriz de transformación
-    glm::vec3 position;         // posición en el mundo
-    glm::vec3 rotation;         // rotación
+    glm::mat4 model;            // matriz de transformaciï¿½n
+    glm::vec3 position;         // posiciï¿½n en el mundo
+    glm::vec3 rotation;         // rotaciï¿½n
     glm::vec3 scale;            // escala
 
     GameObject* parent;          // padre (puede ser nullptr)
 
-    vector<GameObject*> children; // hijos (puede estar vacío el vector)
+    vector<GameObject*> children; // hijos (puede estar vacï¿½o el vector)
     vector<Texture*> textureList;
     vector<Mesh*> mesh;                 // meshes o modelos 3D
-    vector<unsigned int> materialFaces;     // índices de los meshes
+    vector<unsigned int> materialFaces;     // ï¿½ndices de los meshes
     vector<glm::mat4> boneTransforms; // transformaciones de huesos para animaciones
 
 	char* name;                // nombre del objeto

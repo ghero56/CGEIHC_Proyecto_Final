@@ -26,6 +26,10 @@ Texture::~Texture() {
 }
 
 bool Texture::LoadTexture(bool alpha, bool embedded) {
+	cout << "Loading texture: " << filePath << endl;
+	cout << "Alpha: " << alpha << endl;
+	cout << "Embedded: " << embedded << endl;
+
     stbi_set_flip_vertically_on_load(true);
 	if (embedded) {
 		if (!imageData) {
@@ -59,7 +63,7 @@ bool Texture::LoadTexture(bool alpha, bool embedded) {
 }
 
 void Texture::UseTexture() {
-	cout << "Texture ID: " << textureID << endl;
+	//cout << "Texture ID: " << textureID << endl;
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, textureID);
 }

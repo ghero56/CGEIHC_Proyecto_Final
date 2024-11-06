@@ -38,7 +38,7 @@ void main() {
     vCol = vec4(0.0, 1.0, 0.0, 1.0f);
     vColor = vec4(color, 1.0f);
     TexCoord = tex + toffset;
-    Normal = mat3(transpose(inverse(model))) * norm;
+    Normal = normalize(mat3(transpose(inverse(model))) * norm);
     // FragPos = (model * transformedPos).xyz;
     FragPos = (model * vec4(pos, 1.0)).xyz;
 }

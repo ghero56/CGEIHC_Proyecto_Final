@@ -3,6 +3,8 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/main/VisualStudio.gitignore
 
+CGEIHC_P*/
+
 # User-specific files
 *.rsuser
 *.suo
@@ -17,7 +19,7 @@
 mono_crash.*
 
 # Build results
-[Dd]ebug/
+# [Dd]ebug/
 [Dd]ebugPublic/
 [Rr]elease/
 [Rr]eleases/
@@ -74,10 +76,10 @@ StyleCopReport.xml
 *_h.h
 *.ilk
 *.meta
-*.obj
+# *.obj
 *.iobj
 *.pch
-*.pdb
+# *.pdb
 *.ipdb
 *.pgc
 *.pgd

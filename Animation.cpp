@@ -1,13 +1,20 @@
 #include "Animation.h"
 
-Animation::Animation(const std::string& filePath, const aiScene* scene) {
-    if (scene->mNumAnimations > 0) {
+Animation::Animation(const std::string& filePath, const aiScene* scene)
+    : assimpAnimation(nullptr), assimpScene(scene), duration(0.0f), ticksPerSecond(25.0f) {
+    if (scene && scene->mNumAnimations > 0) {
         assimpAnimation = scene->mAnimations[0];
         name = assimpAnimation->mName.C_Str();
         duration = assimpAnimation->mDuration;
         ticksPerSecond = assimpAnimation->mTicksPerSecond != 0 ? assimpAnimation->mTicksPerSecond : 25.0f;
-        assimpScene = scene;  // Guardar la escena completa
     }
+}
+
+Animation::Animation(const aiAnimation* animation) {
+	assimpAnimation = animation;
+	name = assimpAnimation->mName.C_Str();
+	duration = assimpAnimation->mDuration;
+	ticksPerSecond = assimpAnimation->mTicksPerSecond != 0 ? assimpAnimation->mTicksPerSecond : 25.0f;
 }
 
 Animation::~Animation() {}

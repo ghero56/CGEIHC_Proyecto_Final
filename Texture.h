@@ -15,6 +15,8 @@ public:
     void UseTexture();
     void ClearTexture();
 
+    GLuint GetID() { return textureID; }
+
 private:
     GLuint textureID;
     int width, height, bitDepth;
