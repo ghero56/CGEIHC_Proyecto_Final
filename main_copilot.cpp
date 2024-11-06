@@ -71,16 +71,6 @@ void EndOfFrame(GLFWwindow* wind) {
 }
 
 void SerializeObjects() {
-    if (serialize) {
-        std::ofstream stream("./Assets/scene.json");
-        cereal::BinaryOutputArchive oarchive(stream);
-
-        for (GameObject* obj : gameObjects) {
-            oarchive(obj);
-        }
-    }
-    else {
-    }
 }
 
 void ExitCleanup() {
@@ -116,7 +106,6 @@ void EditorTools(bool* demoWindow, ImGui::FileBrowser* fileDialog) {
 
     ImGui::Begin("Bool para el editor");
     ImGui::Text("Serializar objetos o no");
-    ImGui::Checkbox("serialize", &serialize);
     ImGui::End();
 
 
