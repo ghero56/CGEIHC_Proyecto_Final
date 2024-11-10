@@ -44,6 +44,7 @@ public:
 
 private:
 	int bufferWidth, bufferHeight;    
+	int width, height;
 	int key, key_action, key_mods, key_scancode;
 
 	double mouse_x, mouse_y, scroll_y;

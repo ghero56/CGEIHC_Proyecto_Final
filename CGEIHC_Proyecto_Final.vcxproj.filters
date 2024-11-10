@@ -31,6 +31,12 @@
     <Filter Include="Archivos de recursos\Audio">
       <UniqueIdentifier>{87c0b3e0-7093-4da1-acca-b9378d673193}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Archivos de origen\Lights">
+      <UniqueIdentifier>{274751c6-70bd-4929-8804-fdb96f8ae7a5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Archivos de encabezado\Lights">
+      <UniqueIdentifier>{55bc7652-1450-4a52-911d-9b929c904cdc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="include\imgui\imgui_widgets.cpp">
@@ -78,18 +84,6 @@
     <ClCompile Include="Animator.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
-    <ClCompile Include="Light.cpp">
-      <Filter>Archivos de origen</Filter>
-    </ClCompile>
-    <ClCompile Include="DirectionalLight.cpp">
-      <Filter>Archivos de origen</Filter>
-    </ClCompile>
-    <ClCompile Include="PointLight.cpp">
-      <Filter>Archivos de origen</Filter>
-    </ClCompile>
-    <ClCompile Include="SpotLight.cpp">
-      <Filter>Archivos de origen</Filter>
-    </ClCompile>
     <ClCompile Include="stb_image.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
@@ -97,6 +91,24 @@
       <Filter>Archivos de origen</Filter>
     </ClCompile>
     <ClCompile Include="main_copilot.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="SpotLight.cpp">
+      <Filter>Archivos de origen\Lights</Filter>
+    </ClCompile>
+    <ClCompile Include="PointLight.cpp">
+      <Filter>Archivos de origen\Lights</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectionalLight.cpp">
+      <Filter>Archivos de origen\Lights</Filter>
+    </ClCompile>
+    <ClCompile Include="Light.cpp">
+      <Filter>Archivos de origen\Lights</Filter>
+    </ClCompile>
+    <ClCompile Include="Skybox.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="Shader.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
   </ItemGroup>
@@ -155,24 +167,27 @@
     <ClInclude Include="Animation.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
-    <ClInclude Include="Light.h">
-      <Filter>Archivos de encabezado</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectionalLight.h">
-      <Filter>Archivos de encabezado</Filter>
-    </ClInclude>
-    <ClInclude Include="PointLight.h">
+    <ClInclude Include="Camera.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
     <ClInclude Include="SpotLight.h">
-      <Filter>Archivos de encabezado</Filter>
+      <Filter>Archivos de encabezado\Lights</Filter>
     </ClInclude>
-    <ClInclude Include="Camera.h">
+    <ClInclude Include="PointLight.h">
+      <Filter>Archivos de encabezado\Lights</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectionalLight.h">
+      <Filter>Archivos de encabezado\Lights</Filter>
+    </ClInclude>
+    <ClInclude Include="Light.h">
+      <Filter>Archivos de encabezado\Lights</Filter>
+    </ClInclude>
+    <ClInclude Include="Skybox.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Assets\Shaders\FragmentShader.glsl">
+    <None Include="Assets\Shaders\fragmentShader.glsl">
       <Filter>Archivos de recursos\Shaders</Filter>
     </None>
     <None Include="Assets\Shaders\vertexShader.glsl">
@@ -180,6 +195,12 @@
     </None>
     <None Include="Assets\Models\aurora.glb">
       <Filter>Archivos de recursos\3D objects</Filter>
+    </None>
+    <None Include="Assets\Shaders\skyboxFragmentShader.glsl">
+      <Filter>Archivos de recursos\Shaders</Filter>
+    </None>
+    <None Include="Assets\Shaders\skyboxVertexShader.glsl">
+      <Filter>Archivos de recursos\Shaders</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

@@ -11,12 +11,12 @@ GameObject::GameObject(char* name):
     showWireframe(false), showNormals(false), showBones(false), showSkeleton(false),
     showSkeletonJoints(false), showSkeletonBones(false), showSkeletonNames(false),
     showSkeletonWeights(false), showSelfWindow(false), soundSystem(nullptr),
-    sound(nullptr), channel(nullptr), parent(nullptr), animator(nullptr), light(nullptr) {
+    sound(nullptr), channel(nullptr), parent(nullptr), animator(nullptr) {
 
 	animations.clear();
 
 	mesh.empty();
-
+	defaultTexture = nullptr;
     position = glm::vec3(0.0f);
     rotation = glm::vec3(0.0f);
     scale = glm::vec3(1.0f);
@@ -28,8 +28,8 @@ GameObject::GameObject(char* name, GameObject* parent) :
     showWireframe(false), showNormals(false), showBones(false), showSkeleton(false),
     showSkeletonJoints(false), showSkeletonBones(false), showSkeletonNames(false),
     showSkeletonWeights(false), showSelfWindow(false), soundSystem(nullptr),
-    sound(nullptr), channel(nullptr), parent(parent), animator(nullptr), light(nullptr) {
-
+    sound(nullptr), channel(nullptr), parent(parent), animator(nullptr) {
+    defaultTexture = nullptr;
     animations.clear();
 
     mesh.empty();
@@ -45,8 +45,8 @@ GameObject::GameObject() :
     showWireframe(false), showNormals(false), showBones(false), showSkeleton(false),
     showSkeletonJoints(false), showSkeletonBones(false), showSkeletonNames(false),
     showSkeletonWeights(false), showSelfWindow(false), soundSystem(nullptr),
-    sound(nullptr), channel(nullptr), parent(nullptr), animator(nullptr), light(nullptr) {
-
+    sound(nullptr), channel(nullptr), parent(nullptr), animator(nullptr){
+    defaultTexture = nullptr;
     animations.clear();
 
     mesh.empty();
@@ -57,37 +57,16 @@ GameObject::GameObject() :
     model = glm::mat4(1.0f);
 }
 
-GameObject::GameObject(char* name, Light* light) {
-	this->name = name;
-	this->light = light;
-}
-
-GameObject::GameObject(char* name, GameObject* parent, Light* light) {
-	this->name = name;
-	this->light = light;
-	this->parent = parent;
-}
-
-void GameObject::UseLight(GLuint ambientIntensityLocation, GLuint ambientColorLocation, GLuint diffuseIntensityLocation, GLuint directionLocation) {
-    if (!light)
-        return;
-	light->UseLight(ambientIntensityLocation, ambientColorLocation, diffuseIntensityLocation, directionLocation);
-}
-
 void GameObject::SetPosition(const glm::vec3& newPosition) {
-    if (light) {
-        light->SetPosition(newPosition);
-		return;
-    }
     position = newPosition;
-    // Actualiza la matriz de modelo cuando la posici�n cambia
+    // Actualiza la matriz de modelo cuando la posiciï¿½n cambia
     model = glm::translate(glm::mat4(1.0f), position) * glm::mat4_cast(glm::quat(rotation)) * glm::scale(glm::mat4(1.0f), scale);
     // model = glm::translate(model, position);
 }
 
 void GameObject::SetRotation(const glm::vec3& newRotation) {
     rotation = newRotation;
-    // Actualiza la matriz de modelo cuando la rotaci�n cambia
+    // Actualiza la matriz de modelo cuando la rotaciï¿½n cambia
     model = glm::translate(glm::mat4(1.0f), position) * glm::mat4_cast(glm::quat(rotation)) * glm::scale(glm::mat4(1.0f), scale);
 }
 
@@ -125,15 +104,19 @@ void GameObject::CreateMesh(const std::string& filename) {
 
     if (!scene) {
 		cout << "Failed to load model: " << filename << endl;
+		cout << "Error: " << importer.GetErrorString() << endl;
         return;
     }
+
+    this->scene = scene;
+	this->nodes = scene->mRootNode;
+
+	glBindVertexArray(0);
 
     LoadNode(scene->mRootNode, scene);
     LoadMaterials(scene);
 
     // vamos a usar las texturas
-
-
     if (scene->mAnimations != nullptr) {
         // Cargar animaciones, si existen
 		for (unsigned int i = 0; i < scene->mNumAnimations; i++)
@@ -169,13 +152,38 @@ void GameObject::RemoveChild(GameObject* child) {
 }
 
 void GameObject::Update(float deltaTime) {
-    // Actualiza la l�gica del objeto aqu�
+    // Actualiza la lï¿½gica del objeto aquï¿½
     for (auto& child : children) {
         child->Update(deltaTime);
     }
 }
 
+
 void GameObject::Render() {
+    for (int i = 0; i < mesh.size(); i++) {
+        unsigned int materialIndex = materialFaces[i];
+
+        // Comprobamos si hay una textura válida para el material actual
+        if (materialIndex < textureList.size() && textureList[materialIndex]) {
+            glActiveTexture(GL_TEXTURE0); // Activamos la textura
+            textureList[materialIndex]->UseTexture(); // Vinculamos la textura
+        }
+        else {
+            // Si no hay textura válida, usamos la textura por defecto
+            glActiveTexture(GL_TEXTURE0);
+            defaultTexture->UseTexture();
+        }
+
+        mesh[i]->RenderMesh(); // Renderizamos la malla
+    }
+
+    for (auto& child : children) {
+        child->Render();
+    }
+}
+
+/*
+void GameObject::Render() {  
     for (int i = 0; i < mesh.size(); i++) {
 		unsigned int materialIndex = materialFaces[i];
         //std::cout << "Renderizando mesh " << i << " con materialIndex " << materialIndex << std::endl;
@@ -184,14 +192,17 @@ void GameObject::Render() {
             //std::cout << "Usando textura " << materialIndex << " con ID: " << textureList[materialIndex]->GetID() << std::endl;
         }
         else {
-            //std::cout << "No se encontr� textura v�lida para materialIndex " << materialIndex << std::endl;
+            //std::cout << "No se encontrï¿½ textura vï¿½lida para materialIndex " << materialIndex << std::endl;
         }
         mesh[i]->RenderMesh();
 	}
+    
+
     for (auto& child : children) {
         child->Render();
     }
 }
+*/
 
 void GameObject::PlaySound(const std::string& soundFile) {
     if (soundSystem) {
@@ -226,13 +237,8 @@ void GameObject::LoadMesh(aiMesh* mesh, const aiScene* scene) {
         if (mesh->mTextureCoords[0]) {
             vertices.insert(vertices.end(), { mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y });
         }
-        else {
-            vertices.insert(vertices.end(), { 0.0f, 0.0f });
-        }
 
-		// las normales deben invertirse para que se vean correctamente
-        vertices.insert(vertices.end(), { -mesh->mNormals[i].x, -mesh->mNormals[i].y, -mesh->mNormals[i].z });
-        // vertices.insert(vertices.end(), { mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z });
+        vertices.insert(vertices.end(), { mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z });
     }
 
     for (unsigned int i = 0; i < mesh->mNumFaces; i++) {
@@ -242,23 +248,85 @@ void GameObject::LoadMesh(aiMesh* mesh, const aiScene* scene) {
         }
     }
 
-    /*if (this->mesh) {
-        delete this->mesh;
-    }*/
-
     Mesh* newMesh = new Mesh();
     newMesh->CreateMesh(&vertices[0], &indices[0], vertices.size(), indices.size());
 
-	this->mesh.push_back(newMesh);
-	this->materialFaces.push_back(mesh->mMaterialIndex);
+    this->mesh.push_back(newMesh);
+    this->materialFaces.push_back(mesh->mMaterialIndex);
+}
+
+
+void GameObject::color4_to_float4(const aiColor4D* c, float f[4])
+{
+    f[0] = c->r;
+    f[1] = c->g;
+    f[2] = c->b;
+    f[3] = c->a;
+}
+
+void GameObject::set_float4(float f[4], float a, float b, float c, float d)
+{
+    f[0] = a;
+    f[1] = b;
+    f[2] = c;
+    f[3] = d;
+}
+
+void GameObject::apply_material(const aiMaterial* mtl) {
+    float c[4];
+    int ret1, ret2;
+    aiColor4D diffuse;
+    aiColor4D specular;
+    aiColor4D ambient;
+    aiColor4D emission;
+    float shininess, strength;
+    unsigned int max;	// changed: to unsigned
+
+    set_float4(c, 0.8f, 0.8f, 0.8f, 1.0f);
+    if (AI_SUCCESS == aiGetMaterialColor(mtl, AI_MATKEY_COLOR_DIFFUSE, &diffuse)) color4_to_float4(&diffuse, c);
+
+    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, c);
+
+    set_float4(c, 0.0f, 0.0f, 0.0f, 1.0f);
+    if (AI_SUCCESS == aiGetMaterialColor(mtl, AI_MATKEY_COLOR_SPECULAR, &specular)) color4_to_float4(&specular, c);
+
+    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, c);
+
+    set_float4(c, 0.2f, 0.2f, 0.2f, 1.0f);
+    if (AI_SUCCESS == aiGetMaterialColor(mtl, AI_MATKEY_COLOR_AMBIENT, &ambient)) color4_to_float4(&ambient, c);
+
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, c);
+
+    set_float4(c, 0.0f, 0.0f, 0.0f, 1.0f);
+    if (AI_SUCCESS == aiGetMaterialColor(mtl, AI_MATKEY_COLOR_EMISSIVE, &emission)) color4_to_float4(&emission, c);
+
+    glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, c);
+
+    max = 1;
+    ret1 = aiGetMaterialFloatArray(mtl, AI_MATKEY_SHININESS, &shininess, &max);
+    max = 1;
+    ret2 = aiGetMaterialFloatArray(mtl, AI_MATKEY_SHININESS_STRENGTH, &strength, &max);
+    if ((ret1 == AI_SUCCESS) && (ret2 == AI_SUCCESS))
+    {
+        glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, shininess * strength);
+    }
+    else
+    {
+        glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 0.0f);
+        set_float4(c, 0.0f, 0.0f, 0.0f, 0.0f);
+        glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, c);
+    }
+
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
 void GameObject::LoadMaterials(const aiScene* scene) {
-    // Crear una textura por defecto est�tica solo una vez
-    static Texture* defaultTexture = nullptr;
+
+    // Crear una textura por defecto estática solo una vez
+
     if (!defaultTexture) {
         defaultTexture = new Texture("Assets/Textures/plain.png");
-        if (!defaultTexture->LoadTexture(true, false)) {
+        if (!defaultTexture->LoadTexture(true, false, 0,0)) {
             std::cerr << "Error: No se pudo cargar la textura por defecto." << std::endl;
             delete defaultTexture;
             defaultTexture = nullptr;
@@ -276,34 +344,44 @@ void GameObject::LoadMaterials(const aiScene* scene) {
             if (material->GetTexture(aiTextureType_DIFFUSE, 0, &path) == AI_SUCCESS) {
                 const aiTexture* tex = scene->GetEmbeddedTexture(path.C_Str());
                 if (tex) {
-                    // L�gica para cargar textura embebida...
+
+					textureList[i] = new Texture(reinterpret_cast<unsigned char*>(tex->pcData), tex->mWidth, tex->mHeight, tex->CheckFormat("rgba") ? 4 : 3);
+                    if (!textureList[i]->LoadTexture(tex->CheckFormat("rgba"), true, tex->mWidth, tex->mHeight)) {
+                            cout << "Failed to load embbed texture: " << endl; 
+                            delete textureList[i]; 
+                            textureList[i] = nullptr;
+                    }
+
                 }
                 else {
-                    std::string pathStr = path.C_Str();
+                    string pathStr = path.C_Str();
                     int idx = pathStr.rfind("\\");
-                    std::string filename = pathStr.substr(idx + 1);
-                    std::string texPath = "Assets/Textures/" + filename;
+                    string filename = pathStr.substr(idx + 1);
+                    string texPath = "Assets/Textures/" + filename;
                     textureList[i] = new Texture(texPath.c_str());
 
                     bool hasAlpha = (filename.find("tga") != std::string::npos || filename.find("png") != std::string::npos);
-                    if (!textureList[i]->LoadTexture(hasAlpha, false)) {
-                        std::cout << "Fall� en cargar la Textura: " << texPath << std::endl;
+
+                    if (!textureList[i]->LoadTexture(hasAlpha, false,0,0)) {
+                        cout << "Falló en cargar la Textura: " << texPath << std::endl;
+
                         delete textureList[i];
                         textureList[i] = nullptr;
                     }
                     else {
-                        std::cout << "Textura cargada: " << texPath << std::endl;
+                        cout << "Textura cargada: " << texPath << std::endl;
                     }
                 }
             }
         }
 
-        // Si la textura no se carg� correctamente, usa la textura por defecto
+        // Si la textura no se cargï¿½ correctamente, usa la textura por defecto
         if (textureList[i] == nullptr) {
             std::cout << "Se asigna la textura por defecto para material " << i << std::endl;
             textureList[i] = defaultTexture;
         }
     }
+    
 }
 
 void GameObject::EditorTools(bool hide){
@@ -395,9 +473,6 @@ GameObject::~GameObject() {
     }
     if (animator) {
         delete animator;
-    }
-    if (light) {
-        delete light;
     }
     for (auto& child : children) {
         delete child;

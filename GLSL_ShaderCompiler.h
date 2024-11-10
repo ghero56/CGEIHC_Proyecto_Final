@@ -1,52 +1,91 @@
 #pragma once
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
-#include <glm/vec3.hpp> // glm::vec3
+
+#include <stdio.h>
+#include <string>
 #include <iostream>
 #include <fstream>
-#include <string>
-using namespace std;
+#include <glew.h>
+#include "COMMODO_VALUES.h"
+#include "DirectionalLight.h"
+#include "PointLight.h"
+#include "SpotLight.h"
 
-enum ShaderType {
-	VERTEX_SHADER,
-	FRAGMENT_SHADER
+class Shader
+{
+public:
+	Shader();
+
+	void CreateFromString(const char* vertexCode, const char* fragmentCode);
+	void CreateFromFiles(const char* vertexLocation, const char* fragmentLocation);
+
+	std::string ReadFile(const char* fileLocation);
+
+	GLuint GetProjectionLocation();
+	GLuint GetModelLocation();
+	GLuint GetViewLocation();
+	GLuint GetAmbientIntensityLocation();
+	GLuint GetAmbientcolorLocation();
+	GLuint GetDiffuseIntensityLocation();
+	GLuint GetDirectionLocation();
+	GLuint GetSpecularIntensityLocation();
+	GLuint GetShininessLocation();
+	GLuint GetEyePositionLocation();
+	GLuint getColorLocation();
+
+	void SetDirectionalLight(DirectionalLight* dLight);
+	void SetPointLights(PointLight* pLight, unsigned int lightCount);
+	void SetSpotLights(SpotLight* sLight, unsigned int lightCount);
+
+	void UseShader();
+	void ClearShader();
+
+	~Shader();
+
+private:
+	int pointLightCount;
+	int spotLightCount;
+	GLuint shaderID, uniformProjection, uniformModel, uniformColor, uniformView, uniformEyePosition,
+		uniformSpecularIntensity, uniformShininess;
+
+	struct {
+		GLuint uniformcolor;
+		GLuint uniformAmbientIntensity;
+		GLuint uniformDiffuseIntensity;
+
+		GLuint uniformDirection;
+	} uniformDirectionalLight;
+
+	GLuint uniformPointLightCount;
+
+	struct {
+		GLuint uniformcolor;
+		GLuint uniformAmbientIntensity;
+		GLuint uniformDiffuseIntensity;
+
+		GLuint uniformPosition;
+		GLuint uniformConstant;
+		GLuint uniformLinear;
+		GLuint uniformExponent;
+	} uniformPointLight[MAX_POINT_LIGHTS];
+
+	GLuint uniformSpotLightCount;
+
+	struct {
+		GLuint uniformColour;
+		GLuint uniformAmbientIntensity;
+		GLuint uniformDiffuseIntensity;
+
+		GLuint uniformPosition;
+		GLuint uniformConstant;
+		GLuint uniformLinear;
+		GLuint uniformExponent;
+
+		GLuint uniformDirection;
+		GLuint uniformEdge;
+	} uniformSpotLight[MAX_SPOT_LIGHTS];
+
+
+	void CompileShader(const char* vertexCode, const char* fragmentCode);
+	void AddShader(GLuint theProgram, const char* shaderCode, GLenum shaderType);
 };
 
-static GLuint LoadShader(const char* filename, GLenum shader_type) {
-	
-	GLuint shader_id = glCreateShader(shader_type);
-	cout << "Compiling shader: " << filename << " id: " << shader_id << endl;
-	std::ifstream file(filename, ios::in);
-	if (!file) {
-		cout << "Error opening file " << filename << endl;
-		return 0;
-	}
-	string line, source;
-	while (getline(file, line)) {
-		source += line + "\n";
-	}
-	file.close();
-	const char* source_c = source.c_str();
-	glShaderSource(shader_id, 1, &source_c, NULL);
-	glCompileShader(shader_id);
-
-	// comprobamos la compilación
-	GLint isCompiled = 0;
-	glGetShaderiv(shader_id, GL_COMPILE_STATUS, &isCompiled);
-		
-	if (isCompiled == GL_FALSE){
-		GLint maxLength = 0;
-		glGetShaderiv(shader_id, GL_INFO_LOG_LENGTH, &maxLength);
-		// The maxLength includes the NULL character
-		std::vector<GLchar> errorLog(maxLength);
-		glGetShaderInfoLog(shader_id, maxLength, &maxLength, &errorLog[0]);
-		cout << "Error compiling shader: " << filename << " id: " << shader_id << endl;
-		cout << &errorLog[0] << endl;
-		glDeleteShader(shader_id);
-		return 0;
-	}
-
-	// no hay errores
-	cout << "Compiled shader: " << filename << " id: " << shader_id << endl;
-	return shader_id;
-}
