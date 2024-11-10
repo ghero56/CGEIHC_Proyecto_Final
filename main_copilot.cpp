@@ -230,7 +230,7 @@ int main(void) {
 
     // GLFW initialization
     window = Window();
-    window.Initialize(720, 720);
+    window.Initialize(1080, 1080);
 
     glfwPollEvents();
     glfwSetInputMode(window.selfWindow, GLFW_STICKY_KEYS, GLFW_TRUE);
@@ -260,7 +260,7 @@ int main(void) {
     tablero->CreateMesh("Assets/Models/Tablero/tablero.obj");
     
 	GameObject* aurora = new GameObject((char*)"Aurora");
-	aurora->CreateMesh("Assets/Models/aurora.glb");
+	aurora->CreateMesh("Assets/Models/aurora.fbx");
 
     CreateSkybox();
 

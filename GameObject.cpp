@@ -15,7 +15,7 @@ GameObject::GameObject(char* name):
 	animations.clear();
 
 	mesh.empty();
-
+	defaultTexture = nullptr;
     position = glm::vec3(0.0f);
     rotation = glm::vec3(0.0f);
     scale = glm::vec3(1.0f);
@@ -28,7 +28,7 @@ GameObject::GameObject(char* name, GameObject* parent) :
     showSkeletonJoints(false), showSkeletonBones(false), showSkeletonNames(false),
     showSkeletonWeights(false), showSelfWindow(false), soundSystem(nullptr),
     sound(nullptr), channel(nullptr), parent(parent), animator(nullptr) {
-
+    defaultTexture = nullptr;
     animations.clear();
 
     mesh.empty();
@@ -45,7 +45,7 @@ GameObject::GameObject() :
     showSkeletonJoints(false), showSkeletonBones(false), showSkeletonNames(false),
     showSkeletonWeights(false), showSelfWindow(false), soundSystem(nullptr),
     sound(nullptr), channel(nullptr), parent(nullptr), animator(nullptr){
-
+    defaultTexture = nullptr;
     animations.clear();
 
     mesh.empty();
@@ -107,6 +107,9 @@ void GameObject::CreateMesh(const std::string& filename) {
         return;
     }
 
+    this->scene = scene;
+	this->nodes = scene->mRootNode;
+
 	glBindVertexArray(0);
 
     LoadNode(scene->mRootNode, scene);
@@ -154,7 +157,32 @@ void GameObject::Update(float deltaTime) {
     }
 }
 
+
 void GameObject::Render() {
+    for (int i = 0; i < mesh.size(); i++) {
+        unsigned int materialIndex = materialFaces[i];
+
+        // Comprobamos si hay una textura válida para el material actual
+        if (materialIndex < textureList.size() && textureList[materialIndex]) {
+            glActiveTexture(GL_TEXTURE0); // Activamos la textura
+            textureList[materialIndex]->UseTexture(); // Vinculamos la textura
+        }
+        else {
+            // Si no hay textura válida, usamos la textura por defecto
+            glActiveTexture(GL_TEXTURE0);
+            defaultTexture->UseTexture();
+        }
+
+        mesh[i]->RenderMesh(); // Renderizamos la malla
+    }
+
+    for (auto& child : children) {
+        child->Render();
+    }
+}
+
+/*
+void GameObject::Render() {  
     for (int i = 0; i < mesh.size(); i++) {
 		unsigned int materialIndex = materialFaces[i];
         //std::cout << "Renderizando mesh " << i << " con materialIndex " << materialIndex << std::endl;
@@ -167,11 +195,13 @@ void GameObject::Render() {
         }
         mesh[i]->RenderMesh();
 	}
+    
 
     for (auto& child : children) {
         child->Render();
     }
 }
+*/
 
 void GameObject::PlaySound(const std::string& soundFile) {
     if (soundSystem) {
@@ -206,13 +236,8 @@ void GameObject::LoadMesh(aiMesh* mesh, const aiScene* scene) {
         if (mesh->mTextureCoords[0]) {
             vertices.insert(vertices.end(), { mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y });
         }
-        else {
-            vertices.insert(vertices.end(), { 0.0f, 0.0f });
-        }
 
-		// las normales deben invertirse para que se vean correctamente
-        vertices.insert(vertices.end(), { -mesh->mNormals[i].x, -mesh->mNormals[i].y, -mesh->mNormals[i].z });
-        // vertices.insert(vertices.end(), { mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z });
+        vertices.insert(vertices.end(), { mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z });
     }
 
     for (unsigned int i = 0; i < mesh->mNumFaces; i++) {
@@ -222,23 +247,83 @@ void GameObject::LoadMesh(aiMesh* mesh, const aiScene* scene) {
         }
     }
 
-    /*if (this->mesh) {
-        delete this->mesh;
-    }*/
-
     Mesh* newMesh = new Mesh();
     newMesh->CreateMesh(&vertices[0], &indices[0], vertices.size(), indices.size());
 
-	this->mesh.push_back(newMesh);
-	this->materialFaces.push_back(mesh->mMaterialIndex);
+    this->mesh.push_back(newMesh);
+    this->materialFaces.push_back(mesh->mMaterialIndex);
+}
+
+
+void GameObject::color4_to_float4(const aiColor4D* c, float f[4])
+{
+    f[0] = c->r;
+    f[1] = c->g;
+    f[2] = c->b;
+    f[3] = c->a;
+}
+
+void GameObject::set_float4(float f[4], float a, float b, float c, float d)
+{
+    f[0] = a;
+    f[1] = b;
+    f[2] = c;
+    f[3] = d;
+}
+
+void GameObject::apply_material(const aiMaterial* mtl) {
+    float c[4];
+    int ret1, ret2;
+    aiColor4D diffuse;
+    aiColor4D specular;
+    aiColor4D ambient;
+    aiColor4D emission;
+    float shininess, strength;
+    unsigned int max;	// changed: to unsigned
+
+    set_float4(c, 0.8f, 0.8f, 0.8f, 1.0f);
+    if (AI_SUCCESS == aiGetMaterialColor(mtl, AI_MATKEY_COLOR_DIFFUSE, &diffuse)) color4_to_float4(&diffuse, c);
+
+    glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, c);
+
+    set_float4(c, 0.0f, 0.0f, 0.0f, 1.0f);
+    if (AI_SUCCESS == aiGetMaterialColor(mtl, AI_MATKEY_COLOR_SPECULAR, &specular)) color4_to_float4(&specular, c);
+
+    glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, c);
+
+    set_float4(c, 0.2f, 0.2f, 0.2f, 1.0f);
+    if (AI_SUCCESS == aiGetMaterialColor(mtl, AI_MATKEY_COLOR_AMBIENT, &ambient)) color4_to_float4(&ambient, c);
+
+    glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, c);
+
+    set_float4(c, 0.0f, 0.0f, 0.0f, 1.0f);
+    if (AI_SUCCESS == aiGetMaterialColor(mtl, AI_MATKEY_COLOR_EMISSIVE, &emission)) color4_to_float4(&emission, c);
+
+    glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, c);
+
+    max = 1;
+    ret1 = aiGetMaterialFloatArray(mtl, AI_MATKEY_SHININESS, &shininess, &max);
+    max = 1;
+    ret2 = aiGetMaterialFloatArray(mtl, AI_MATKEY_SHININESS_STRENGTH, &strength, &max);
+    if ((ret1 == AI_SUCCESS) && (ret2 == AI_SUCCESS))
+    {
+        glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, shininess * strength);
+    }
+    else
+    {
+        glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, 0.0f);
+        set_float4(c, 0.0f, 0.0f, 0.0f, 0.0f);
+        glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, c);
+    }
+
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
 void GameObject::LoadMaterials(const aiScene* scene) {
     // Crear una textura por defecto estática solo una vez
-    static Texture* defaultTexture = nullptr;
     if (!defaultTexture) {
         defaultTexture = new Texture("Assets/Textures/plain.png");
-        if (!defaultTexture->LoadTexture(true, false)) {
+        if (!defaultTexture->LoadTexture(true, false, 0,0)) {
             std::cerr << "Error: No se pudo cargar la textura por defecto." << std::endl;
             delete defaultTexture;
             defaultTexture = nullptr;
@@ -256,7 +341,12 @@ void GameObject::LoadMaterials(const aiScene* scene) {
             if (material->GetTexture(aiTextureType_DIFFUSE, 0, &path) == AI_SUCCESS) {
                 const aiTexture* tex = scene->GetEmbeddedTexture(path.C_Str());
                 if (tex) {
-                    // Lógica para cargar textura embebida...
+					textureList[i] = new Texture(reinterpret_cast<unsigned char*>(tex->pcData), tex->mWidth, tex->mHeight, tex->CheckFormat("rgba") ? 4 : 3);
+                    if (!textureList[i]->LoadTexture(tex->CheckFormat("rgba"), true, tex->mWidth, tex->mHeight)) {
+                            cout << "Failed to load embbed texture: " << endl; 
+                            delete textureList[i]; 
+                            textureList[i] = nullptr;
+                    }
                 }
                 else {
                     string pathStr = path.C_Str();
@@ -266,7 +356,7 @@ void GameObject::LoadMaterials(const aiScene* scene) {
                     textureList[i] = new Texture(texPath.c_str());
 
                     bool hasAlpha = (filename.find("tga") != std::string::npos || filename.find("png") != std::string::npos);
-                    if (!textureList[i]->LoadTexture(hasAlpha, false)) {
+                    if (!textureList[i]->LoadTexture(hasAlpha, false,0,0)) {
                         cout << "Falló en cargar la Textura: " << texPath << std::endl;
                         delete textureList[i];
                         textureList[i] = nullptr;
@@ -284,6 +374,7 @@ void GameObject::LoadMaterials(const aiScene* scene) {
             textureList[i] = defaultTexture;
         }
     }
+    
 }
 
 void GameObject::EditorTools(bool hide){

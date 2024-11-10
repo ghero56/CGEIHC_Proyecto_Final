@@ -78,6 +78,10 @@ public:
 
     void UseLight(GLuint , GLuint , GLuint , GLuint );
 
+    void color4_to_float4(const aiColor4D* c, float f[4]);
+	void set_float4(float f[4], float a, float b, float c, float d);
+	void apply_material(const aiMaterial* mtl);
+
     ~GameObject();
 
 private:
@@ -85,6 +89,12 @@ private:
     vector<Animation*> animations;
     Animator* animator;	
 
+	const aiScene* scene;
+    aiNode* nodes;
+	aiMesh* meshes;
+	aiMaterial* materials;
+
+	GLuint* textureIds;
     bool selected;
     bool showGizmos;
     bool showBoundingBox;
@@ -110,6 +120,8 @@ private:
     glm::vec3 scale;            // escala
 
     GameObject* parent;          // padre (puede ser nullptr)
+
+    Texture* defaultTexture;
 
     vector<GameObject*> children; // hijos (puede estar vacío el vector)
     vector<Texture*> textureList;
