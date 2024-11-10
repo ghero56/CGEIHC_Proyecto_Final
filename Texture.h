@@ -7,6 +7,7 @@
 
 class Texture {
 public:
+	Texture();
     Texture(const std::string& filePath);
     Texture(unsigned char* imageData, int width, int height, int channels);
     ~Texture();

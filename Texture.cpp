@@ -4,6 +4,15 @@
 
 using namespace std;
 
+Texture::Texture()
+{
+    textureID = 0;
+    width = 0;
+    height = 0;
+    bitDepth = 0;
+    filePath = "";
+}
+
 Texture::Texture(const std::string& filePath) {
     this->filePath = filePath;
     textureID = 0;
@@ -21,12 +30,8 @@ Texture::Texture(unsigned char* imageData, int width, int height, int channels) 
     this->bitDepth = channels;
 }
 
-Texture::~Texture() {
-    ClearTexture();
-}
-
 bool Texture::LoadTexture(bool alpha, bool embedded) {
-	cout << "Loading texture: " << filePath << endl;
+	cout << "\nLoading texture: " << filePath << endl;
 	cout << "Alpha: " << alpha << endl;
 	cout << "Embedded: " << embedded << endl;
 
@@ -68,10 +73,17 @@ void Texture::UseTexture() {
     glBindTexture(GL_TEXTURE_2D, textureID);
 }
 
-void Texture::ClearTexture() {
+void Texture::ClearTexture()
+{
     glDeleteTextures(1, &textureID);
     textureID = 0;
     width = 0;
     height = 0;
     bitDepth = 0;
+    filePath = "";
+}
+
+Texture::~Texture()
+{
+    ClearTexture();
 }
