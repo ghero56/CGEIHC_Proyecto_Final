@@ -25,7 +25,7 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
-// creaci�n de ventana y shaders
+// creación de ventana y shaders
 #include "Window.h"
 #include "GLSL_ShaderCompiler.h"
 
@@ -33,7 +33,7 @@
 #include "Mesh.h"
 #include "GameObject.h"
 
-// Iluminaci�n
+// Iluminación
 #include "Skybox.h"
 // #include "Light.h"
 #include "DirectionalLight.h"
@@ -42,10 +42,14 @@
 
 #include "Camera.h"
 
-// serializaci�n
+// serialización
 #include <json.hpp>
 
+#include <cereal/archives/json.hpp>
+#include<fstream>
+
 using namespace std;
+using namespace jsoncons;
 
 //-------------------- Variables globales --------------------//
 Window window;
@@ -74,8 +78,9 @@ SpotLight spotLights[MAX_SPOT_LIGHTS];
 unsigned int spotLightCount = 0;
 unsigned int pointLightCount = 0;
 
-// para la creaci�n del nuevo objeto en el editor
+// para la creación del nuevo objeto en el editor
 static char name[20] = "";
+int posis = 0;
 
 // ------------------- Funciones ------------------- //
 void NewFrame() {
@@ -110,7 +115,134 @@ void EndOfFrame(GLFWwindow* wind) {
 	window.SwapBuffers();
 }
 
+void Serialize() {
+    std::ofstream serialFile("./Assets/scene.json", std::ios_base::out | std::ios_base::trunc);
+    assert(serialFile);
+    serialFile << "[";
+    serialFile.close();
+    for (auto& obj : gameObjects) {
+        obj->Serialize(posis);
+        posis++;
+    }
+    serialFile.open("./Assets/scene.json", std::ios_base::out | std::ios_base::app);
+    serialFile << "]";
+    serialFile.close();
+}
+
+void Decode() {
+    std::ifstream is("./Assets/scene.json");
+
+    json_stream_cursor cursor(is);
+    cursor.next();
+    const auto& event = cursor.current();   
+    
+    int posisI = 0;
+
+    for (; !cursor.done(); cursor.next())
+    {
+        if (cursor.current().event_type() == staj_event_type::begin_object) {
+            
+            GameObject* obj = gameObjects[posisI];
+
+            glm::vec3 posis;
+            glm::vec3 rota;
+            glm::vec3 scal;
+            glm::mat4 model;
+
+            cursor.next();
+            cursor.next();
+            //obj->setName(cursor.current().get<std::string_view>());
+            cursor.next();
+            cursor.next();
+            cursor.next();
+            cursor.next();
+
+            model[0].x = (float)cursor.current().get<double>();
+            cursor.next();
+            model[0].y = (float)cursor.current().get<double>();
+            cursor.next();
+            model[0].z = (float)cursor.current().get<double>();
+
+            cursor.next();
+            cursor.next();
+            cursor.next();
+
+            model[1].x = (float)cursor.current().get<double>();
+            cursor.next();
+            model[1].y = (float)cursor.current().get<double>();
+            cursor.next();
+            model[1].z = (float)cursor.current().get<double>();
+
+            cursor.next();
+            cursor.next();
+            cursor.next();
+
+            model[2].x = (float)cursor.current().get<double>();
+            cursor.next();
+            model[2].y = (float)cursor.current().get<double>();
+            cursor.next();
+            model[2].z = (float)cursor.current().get<double>();
+
+            cursor.next();
+            cursor.next();
+            cursor.next();
+
+            model[3].x = (float)cursor.current().get<double>();
+            cursor.next();
+            model[3].y = (float)cursor.current().get<double>();
+            cursor.next();
+            model[3].z = (float)cursor.current().get<double>();
+
+            obj->SetModelMatrix(model);
+
+            cursor.next();
+            cursor.next();
+            cursor.next();
+            cursor.next();
+            cursor.next();
+
+            posis.x = (float)cursor.current().get<double>();
+            cursor.next();
+            posis.y = (float)cursor.current().get<double>();
+            cursor.next();
+            posis.z = (float)cursor.current().get<double>();
+
+            obj->SetPosition(posis);
+
+            cursor.next();
+            cursor.next();
+            cursor.next();
+            cursor.next();
+
+            rota.x = (float)cursor.current().get<double>();
+            cursor.next();
+            rota.y = (float)cursor.current().get<double>();
+            cursor.next();
+            rota.z = (float)cursor.current().get<double>();
+
+            obj->SetRotation(rota);
+
+            cursor.next();
+            cursor.next();
+            cursor.next();
+            cursor.next();
+
+            scal.x = (float)cursor.current().get<double>();
+            cursor.next();
+            scal.y = (float)cursor.current().get<double>();
+            cursor.next();
+            scal.z = (float)cursor.current().get<double>();
+
+            obj->SetScale(scal);
+            posisI++;
+
+        }
+    }
+
+}
+
 void ExitCleanup() {
+    Serialize();
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
@@ -139,6 +271,12 @@ void EditorTools(bool* demoWindow, ImGui::FileBrowser* fileDialog) {
         }
     }
     ImGui::End();
+
+    ImGui::Begin("Bool para el editor");
+    ImGui::Text("Serializar objetos o no");
+    ImGui::End();
+
+
 
     fileDialog->Display();
 
@@ -240,10 +378,13 @@ int main(void) {
     imgui_io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 
     // Shader compilation
+
 	CreateShaders();
 
-    // inicializaci�n de la camara
-    camera = Camera(glm::vec3(0.0f, 3.0f, 10.0f), glm::vec3(0.0f, 1.0f, 0.0f), 990.5f, -18.0f, 10.0f, 0.5f);
+
+    // inicializaciï¿½n de la camara
+    camera = Camera(glm::vec3(0.0f, 3.0f, 10.0f), glm::vec3(0.0f, 1.0f, 0.0f), 990.5f, -18.0f, 50.0f, 0.5f);
+
 
     GLuint  uniformProjection = 0, 
             uniformModel = 0, 
@@ -253,14 +394,118 @@ int main(void) {
             uniformShininess = 0, 
             uniformColor = 0;
 
+
     glm::mat4 projection = glm::perspective(glm::radians(45.0f), (GLfloat)window.getBufferWidth() / window.getBufferHeight(), 0.1f, 10000.0f);
 
-    // Crear y configurar el GameObject
     GameObject* tablero = new GameObject((char*)"Tablero");
+    gameObjects.push_back(tablero);
     tablero->CreateMesh("Assets/Models/Tablero/tablero.obj");
     
-	GameObject* aurora = new GameObject((char*)"Aurora");
-	aurora->CreateMesh("Assets/Models/aurora.fbx");
+
+    GameObject* templo2 = new GameObject((char*)"templo2");
+    gameObjects.push_back(templo2);
+    templo2->CreateMesh("Assets/Models/Oscar/templo_aire_2.fbx");
+
+    GameObject* mesa_pai_sho = new GameObject((char*)"mesa_pai_sho");
+    gameObjects.push_back(mesa_pai_sho);
+    mesa_pai_sho->CreateMesh("Assets/Models/Oscar/mesa_pai_sho.obj");
+
+    GameObject* appa = new GameObject((char*)"Appa");
+    gameObjects.push_back(appa);
+    appa->CreateMesh("Assets/Models/Oscar/appa.fbx");
+    
+    
+    
+    
+    GameObject* yumi = new GameObject((char*)"Yumi edg");
+    gameObjects.push_back(yumi);
+    yumi->CreateMesh("Assets/Models/Fernando/edg_yuumi.glb");
+    
+    GameObject* morgana = new GameObject((char*)"Morgana");
+    gameObjects.push_back(morgana);
+    morgana->CreateMesh("Assets/Models/Fernando/morgana.glb");
+    
+    GameObject* diana = new GameObject((char*)"diana");
+    gameObjects.push_back(diana);
+    diana->CreateMesh("Assets/Models/Fernando/winterblessed_diana.glb");
+
+    GameObject* dragonE = new GameObject((char*)"Dragon Elder");
+    gameObjects.push_back(dragonE);
+    dragonE->CreateMesh("Assets/Models/Fernando/dragon_(elder).glb");
+    
+    GameObject* gromp = new GameObject((char*)"Gromp");
+    gameObjects.push_back(gromp);
+    gromp->CreateMesh("Assets/Models/Fernando/gromp.glb");
+
+    GameObject* akshan = new GameObject((char*)"Akshan");
+    gameObjects.push_back(akshan);
+    akshan->CreateMesh("Assets/Models/Fernando/cyber_pop_akshan.glb");
+    /*
+    GameObject* maestroJ = new GameObject((char*)"Maestro Jhin");
+    gameObjects.push_back(maestroJ);
+    akshan->CreateMesh("Assets/Models/Fernando/maestro_jhin.glb");
+
+    GameObject* baronN = new GameObject((char*)"Baron Nashor");
+    gameObjects.push_back(baronN);
+    akshan->CreateMesh("Assets/Models/Fernando/baron.glb");
+    */
+
+    GameObject* dragon = new GameObject((char*)"dragon");
+    gameObjects.push_back(dragon);
+    dragon->CreateMesh("Assets/Models/Oscar/dragon.fbx");
+
+    GameObject* glider = new GameObject((char*)"glider");
+    gameObjects.push_back(glider);
+    glider->CreateMesh("Assets/Models/Oscar/glider.fbx");
+
+    GameObject* ba_sin_se = new GameObject((char*)"ba_sin_se");
+    gameObjects.push_back(ba_sin_se);
+    ba_sin_se->CreateMesh("Assets/Models/Oscar/ba_sin_se.obj");
+
+    GameObject* tribuA = new GameObject((char*)"tribuA");
+    gameObjects.push_back(tribuA);
+    tribuA->CreateMesh("Assets/Models/Oscar/tribu_agua.obj");
+
+    GameObject* templo1 = new GameObject((char*)"templo1");
+    gameObjects.push_back(templo1);
+    templo1->CreateMesh("Assets/Models/Oscar/templo_aire_1.obj");
+
+    GameObject* tetera = new GameObject((char*)"tetera");
+    gameObjects.push_back(tetera);
+    tetera->CreateMesh("Assets/Models/Oscar/tetera_iroh.fbx");
+
+    GameObject* carro_coles = new GameObject((char*)"carro_coles");
+    gameObjects.push_back(carro_coles);
+    carro_coles->CreateMesh("Assets/Models/Oscar/carro_coles.fbx");
+
+    GameObject* soldado = new GameObject((char*)"soldado");
+    gameObjects.push_back(soldado);
+    soldado->CreateMesh("Assets/Models/Oscar/soldado_nf.obj");
+
+    GameObject* momo = new GameObject((char*)"momo");
+    gameObjects.push_back(momo);
+    momo->CreateMesh("Assets/Models/Oscar/momo.fbx");
+
+    GameObject* prison = new GameObject((char*)"prision");
+    gameObjects.push_back(prison);
+    prison->CreateMesh("Assets/Models/Oscar/prision.obj");
+
+    if (filesystem::exists("./Assets/scene.json"))
+    {
+        Decode();
+        // Crear y configurar el GameObject
+        /*GameObject* tablero = new GameObject((char*)"Tablero");
+        gameObjects.push_back(tablero);
+        tablero->CreateMesh("Assets/Models/Tablero/tablero.obj");
+
+        GameObject* aurora = new GameObject((char*)"Aurora");
+        gameObjects.push_back(aurora);
+        aurora->CreateMesh("Assets/Models/Aurora/aurora.obj");*/
+    }
+
+    
+
+
 
     CreateSkybox();
 
@@ -309,7 +554,7 @@ int main(void) {
         uniformEyePosition = shaderList[0].GetEyePositionLocation();
         uniformColor = shaderList[0].getColorLocation();
 
-        //informaci�n en el shader de intensidad especular y brillo
+        //información en el shader de intensidad especular y brillo
         uniformSpecularIntensity = shaderList[0].GetSpecularIntensityLocation();
         uniformShininess = shaderList[0].GetShininessLocation();
         
@@ -317,7 +562,7 @@ int main(void) {
         glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
         glUniform3f(uniformEyePosition, camera.getCameraPosition().x, camera.getCameraPosition().y, camera.getCameraPosition().z);
         
-        // borrar, la luz pegada a la c�mara
+        // borrar, la luz pegada a la cámara
         glm::vec3 lowerLight = camera.getCameraPosition();
         lowerLight.y -= 0.3f;
         spotLights[0].SetFlash(lowerLight, camera.getCameraDirection());
@@ -336,18 +581,23 @@ int main(void) {
         glUniform3fv(uniformColor, 1, glm::value_ptr(color));
         meshList[0]->RenderMesh();
 
-		model = glm::mat4(1.0f);
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(aurora->GetModelMatrix()));
+
+
+
+        /*
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(aurora->GetModelMatrix()));
 		aurora->Render();
 		aurora->EditorTools(!EditorMode);
 
-		// Renderizaci�n del GameObject
-        /*
+		
+        // Renderizaciï¿½n del GameObject
+
         if (aurora->HasAnimation()) {
             aurora->Animate(deltaTime);
             glUniformMatrix4fv(boneTransformsLoc, aurora->GetBoneTransforms().size(), GL_FALSE, glm::value_ptr(aurora->GetBoneTransforms()[0]));
         }
         */
+
 
         if (!gameObjects.empty())
         {
@@ -356,21 +606,31 @@ int main(void) {
                 // Actualizar la matriz de modelo en el shader
                 glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(gameObject->GetModelMatrix()));
 
+                //gameObjects.push_back(gameObject);
+
                 // Renderizar el objeto
                 gameObject->Render();
 
-                // Herramientas de edici�n (pasando el modo de edici�n como par�metro)
-                gameObject->EditorTools(!EditorMode);
+                // Herramientas de ediciï¿½n (pasando el modo de ediciï¿½n como parï¿½metro)
+                    gameObject->EditorTools(!EditorMode);
+
+                /*if (gameObject->HasAnimation()) {
+                    gameObject->Animate(deltaTime);
+                    glUniformMatrix4fv(boneTransformsLoc, gameObject->GetBoneTransforms().size(), GL_FALSE, glm::value_ptr(gameObject->GetBoneTransforms()[0]));
+                }*/
             }
         }
 
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(tablero->GetModelMatrix()));
+
+        /*
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(tablero->GetModelMatrix()));
+
         tablero->Render();
         tablero->EditorTools(!EditorMode);
-
+        */
         EndOfFrame(window.selfWindow);
     }
-
+    //aurora->Serialize();
     ExitCleanup();
     return 0;
 }

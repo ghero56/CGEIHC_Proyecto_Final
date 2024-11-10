@@ -31,10 +31,12 @@ void Camera::keyControl(bool* keys, GLfloat deltaTime)
 
 void Camera::scrollControl(GLfloat yChange, GLfloat deltaTime)
 {
-	// cambiamos la velocidad de la cámara
+
+	// cambiamos la velocidad de la cÃ¡mara
 	moveSpeed += yChange * 0.05f;
 	if (moveSpeed < 0.1f) moveSpeed = 0.1f;
 	if (moveSpeed > 10.0f) moveSpeed = 10.0f;
+
 }
 
 void Camera::mouseButtons(int* buttons)
@@ -55,11 +57,11 @@ void Camera::mouseControl(GLfloat xChange, GLfloat yChange) {
 	yaw += xChange;
 	pitch += yChange;
 
-	// Limita el pitch para evitar la inversión de la cámara
+	// Limita el pitch para evitar la inversiÃ³n de la cÃ¡mara
 	if (pitch > 89.0f) pitch = 89.0f;
 	if (pitch < -89.0f) pitch = -89.0f;
 
-	update();  // Actualiza la dirección de la cámara	
+	update();  // Actualiza la direcciÃ³n de la cÃ¡mara	
 }
 
 glm::mat4 Camera::calculateViewMatrix()

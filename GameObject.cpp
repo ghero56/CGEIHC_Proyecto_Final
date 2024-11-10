@@ -1,4 +1,5 @@
 #include "GameObject.h"
+#include <jsoncons/json_encoder.hpp>
 #include "glm/gtc/matrix_transform.hpp"
 #include <glm/gtc/quaternion.hpp> // Incluir las funciones de cuaterniones
 #include <algorithm>
@@ -58,14 +59,14 @@ GameObject::GameObject() :
 
 void GameObject::SetPosition(const glm::vec3& newPosition) {
     position = newPosition;
-    // Actualiza la matriz de modelo cuando la posici�n cambia
+    // Actualiza la matriz de modelo cuando la posiciï¿½n cambia
     model = glm::translate(glm::mat4(1.0f), position) * glm::mat4_cast(glm::quat(rotation)) * glm::scale(glm::mat4(1.0f), scale);
     // model = glm::translate(model, position);
 }
 
 void GameObject::SetRotation(const glm::vec3& newRotation) {
     rotation = newRotation;
-    // Actualiza la matriz de modelo cuando la rotaci�n cambia
+    // Actualiza la matriz de modelo cuando la rotaciï¿½n cambia
     model = glm::translate(glm::mat4(1.0f), position) * glm::mat4_cast(glm::quat(rotation)) * glm::scale(glm::mat4(1.0f), scale);
 }
 
@@ -151,7 +152,7 @@ void GameObject::RemoveChild(GameObject* child) {
 }
 
 void GameObject::Update(float deltaTime) {
-    // Actualiza la l�gica del objeto aqu�
+    // Actualiza la lï¿½gica del objeto aquï¿½
     for (auto& child : children) {
         child->Update(deltaTime);
     }
@@ -162,13 +163,13 @@ void GameObject::Render() {
     for (int i = 0; i < mesh.size(); i++) {
         unsigned int materialIndex = materialFaces[i];
 
-        // Comprobamos si hay una textura v�lida para el material actual
+        // Comprobamos si hay una textura válida para el material actual
         if (materialIndex < textureList.size() && textureList[materialIndex]) {
             glActiveTexture(GL_TEXTURE0); // Activamos la textura
             textureList[materialIndex]->UseTexture(); // Vinculamos la textura
         }
         else {
-            // Si no hay textura v�lida, usamos la textura por defecto
+            // Si no hay textura válida, usamos la textura por defecto
             glActiveTexture(GL_TEXTURE0);
             defaultTexture->UseTexture();
         }
@@ -191,7 +192,7 @@ void GameObject::Render() {
             //std::cout << "Usando textura " << materialIndex << " con ID: " << textureList[materialIndex]->GetID() << std::endl;
         }
         else {
-            //std::cout << "No se encontr� textura v�lida para materialIndex " << materialIndex << std::endl;
+            //std::cout << "No se encontrï¿½ textura vï¿½lida para materialIndex " << materialIndex << std::endl;
         }
         mesh[i]->RenderMesh();
 	}
@@ -320,7 +321,9 @@ void GameObject::apply_material(const aiMaterial* mtl) {
 }
 
 void GameObject::LoadMaterials(const aiScene* scene) {
-    // Crear una textura por defecto est�tica solo una vez
+
+    // Crear una textura por defecto estática solo una vez
+
     if (!defaultTexture) {
         defaultTexture = new Texture("Assets/Textures/plain.png");
         if (!defaultTexture->LoadTexture(true, false, 0,0)) {
@@ -341,12 +344,14 @@ void GameObject::LoadMaterials(const aiScene* scene) {
             if (material->GetTexture(aiTextureType_DIFFUSE, 0, &path) == AI_SUCCESS) {
                 const aiTexture* tex = scene->GetEmbeddedTexture(path.C_Str());
                 if (tex) {
+
 					textureList[i] = new Texture(reinterpret_cast<unsigned char*>(tex->pcData), tex->mWidth, tex->mHeight, tex->CheckFormat("rgba") ? 4 : 3);
                     if (!textureList[i]->LoadTexture(tex->CheckFormat("rgba"), true, tex->mWidth, tex->mHeight)) {
                             cout << "Failed to load embbed texture: " << endl; 
                             delete textureList[i]; 
                             textureList[i] = nullptr;
                     }
+
                 }
                 else {
                     string pathStr = path.C_Str();
@@ -356,8 +361,10 @@ void GameObject::LoadMaterials(const aiScene* scene) {
                     textureList[i] = new Texture(texPath.c_str());
 
                     bool hasAlpha = (filename.find("tga") != std::string::npos || filename.find("png") != std::string::npos);
+
                     if (!textureList[i]->LoadTexture(hasAlpha, false,0,0)) {
-                        cout << "Fall� en cargar la Textura: " << texPath << std::endl;
+                        cout << "Falló en cargar la Textura: " << texPath << std::endl;
+
                         delete textureList[i];
                         textureList[i] = nullptr;
                     }
@@ -368,7 +375,7 @@ void GameObject::LoadMaterials(const aiScene* scene) {
             }
         }
 
-        // Si la textura no se carg� correctamente, usa la textura por defecto
+        // Si la textura no se cargï¿½ correctamente, usa la textura por defecto
         if (textureList[i] == nullptr) {
             std::cout << "Se asigna la textura por defecto para material " << i << std::endl;
             textureList[i] = defaultTexture;
@@ -489,4 +496,91 @@ GameObject::~GameObject() {
     if (parent) {
         parent->RemoveChild(this);
     }
+}
+
+void GameObject::Serialize(int posis) {
+    if (children.size() > 0){
+        for (GameObject* child : children) {
+            child->Serialize(posis);
+            posis++;
+        }
+    }
+
+    
+    std::ofstream serialFile("./Assets/scene.json", std::ios_base::out | std::ios_base::app);
+    assert(serialFile);
+    jsoncons::compact_json_stream_encoder encoder(serialFile);
+
+    encoder.begin_object();
+        encoder.key("name");
+            encoder.string_value(name);
+        encoder.key("model");
+            encoder.begin_array();
+                encoder.begin_array();
+                    encoder.double_value(model[0].x);
+                    encoder.double_value(model[0].y);
+                    encoder.double_value(model[0].z);
+                encoder.end_array();
+                encoder.begin_array();
+                    encoder.double_value(model[1].x);
+                    encoder.double_value(model[1].y);
+                    encoder.double_value(model[1].z);
+                encoder.end_array();
+                encoder.begin_array();
+                    encoder.double_value(model[2].x);
+                    encoder.double_value(model[2].y);
+                    encoder.double_value(model[2].z);
+                encoder.end_array();
+                encoder.begin_array();
+                    encoder.double_value(model[3].x);
+                    encoder.double_value(model[3].y);
+                    encoder.double_value(model[3].z);
+                encoder.end_array();
+            encoder.end_array();
+        encoder.key("position");
+            encoder.begin_array();
+                encoder.double_value(position.x);
+                encoder.double_value(position.y);
+                encoder.double_value(position.z);
+            encoder.end_array();
+        encoder.key("rotation");
+            encoder.begin_array();
+                encoder.double_value(rotation.x);
+                encoder.double_value(rotation.y);
+                encoder.double_value(rotation.z);
+            encoder.end_array();
+        encoder.key("scale");
+            encoder.begin_array();
+                encoder.double_value(scale.x);
+                encoder.double_value(scale.y);
+                encoder.double_value(scale.z);
+            encoder.end_array();
+  
+        encoder.key("parent");
+            if (parent != nullptr)
+            {
+                encoder.string_value(parent->name);
+            }
+            else {
+                encoder.null_value();
+            }
+        encoder.key("children");
+            if (children.size() > 0)
+            {
+                encoder.begin_array();
+                for (GameObject* child : children) {
+                    encoder.string_value(child->name);
+                }
+                encoder.end_array();
+            }
+            else {
+                encoder.null_value();
+            }
+
+    encoder.end_object();
+    if (posis != 0) {
+        serialFile << ",";
+    }
+    encoder.flush();
+    serialFile.close();
 }
