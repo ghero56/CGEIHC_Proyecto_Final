@@ -29,6 +29,7 @@
 #include<fstream>
 
 using namespace std;
+using namespace jsoncons;
 
 Window window;
 Camera camera;
@@ -83,6 +84,118 @@ void Serialize() {
     serialFile.open("./Assets/scene.json", std::ios_base::out | std::ios_base::app);
     serialFile << "]";
     serialFile.close();
+}
+
+void Decode() {
+    std::ifstream is("./Assets/scene.json");
+
+    json_stream_cursor cursor(is);
+    cursor.next();
+    const auto& event = cursor.current();   
+    
+    int posisI = 0;
+
+    for (; !cursor.done(); cursor.next())
+    {
+        if (cursor.current().event_type() == staj_event_type::begin_object) {
+            
+            GameObject* obj = gameObjects[posisI];
+
+            glm::vec3 posis;
+            glm::vec3 rota;
+            glm::vec3 scal;
+            glm::mat4 model;
+
+            cursor.next();
+            cursor.next();
+            //obj->setName(cursor.current().get<std::string_view>());
+            cursor.next();
+            cursor.next();
+            cursor.next();
+            cursor.next();
+
+            model[0].x = (float)cursor.current().get<double>();
+            cursor.next();
+            model[0].y = (float)cursor.current().get<double>();
+            cursor.next();
+            model[0].z = (float)cursor.current().get<double>();
+
+            cursor.next();
+            cursor.next();
+            cursor.next();
+
+            model[1].x = (float)cursor.current().get<double>();
+            cursor.next();
+            model[1].y = (float)cursor.current().get<double>();
+            cursor.next();
+            model[1].z = (float)cursor.current().get<double>();
+
+            cursor.next();
+            cursor.next();
+            cursor.next();
+
+            model[2].x = (float)cursor.current().get<double>();
+            cursor.next();
+            model[2].y = (float)cursor.current().get<double>();
+            cursor.next();
+            model[2].z = (float)cursor.current().get<double>();
+
+            cursor.next();
+            cursor.next();
+            cursor.next();
+
+            model[3].x = (float)cursor.current().get<double>();
+            cursor.next();
+            model[3].y = (float)cursor.current().get<double>();
+            cursor.next();
+            model[3].z = (float)cursor.current().get<double>();
+
+            obj->SetModelMatrix(model);
+
+            cursor.next();
+            cursor.next();
+            cursor.next();
+            cursor.next();
+            cursor.next();
+
+            posis.x = (float)cursor.current().get<double>();
+            cursor.next();
+            posis.y = (float)cursor.current().get<double>();
+            cursor.next();
+            posis.z = (float)cursor.current().get<double>();
+
+            obj->SetPosition(posis);
+
+            cursor.next();
+            cursor.next();
+            cursor.next();
+            cursor.next();
+
+            rota.x = (float)cursor.current().get<double>();
+            cursor.next();
+            rota.y = (float)cursor.current().get<double>();
+            cursor.next();
+            rota.z = (float)cursor.current().get<double>();
+
+            obj->SetRotation(rota);
+
+            cursor.next();
+            cursor.next();
+            cursor.next();
+            cursor.next();
+
+            scal.x = (float)cursor.current().get<double>();
+            cursor.next();
+            scal.y = (float)cursor.current().get<double>();
+            cursor.next();
+            scal.z = (float)cursor.current().get<double>();
+
+            obj->SetScale(scal);
+            posisI++;
+
+        }
+    }
+
 }
 
 void ExitCleanup() {
@@ -227,7 +340,7 @@ int main(void) {
     // glUseProgram(shaderProgram);
 
     // inicializaci�n de la camara
-    camera = Camera(glm::vec3(0.0f, 3.0f, 10.0f), glm::vec3(0.0f, 1.0f, 0.0f), 990.5f, -18.0f, 10.0f, 0.5f);
+    camera = Camera(glm::vec3(0.0f, 3.0f, 10.0f), glm::vec3(0.0f, 1.0f, 0.0f), 990.5f, -18.0f, 50.0f, 0.5f);
 
     // Inicializaci�n de uniforms
     GLuint modelLoc = glGetUniformLocation(shaderProgram, "model");
@@ -256,14 +369,112 @@ int main(void) {
     glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
     glUniformMatrix4fv(lightSpaceMatrixLoc, 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix));
 
-    // Crear y configurar el GameObject
     GameObject* tablero = new GameObject((char*)"Tablero");
     gameObjects.push_back(tablero);
     tablero->CreateMesh("Assets/Models/Tablero/tablero.obj");
     
-	GameObject* aurora = new GameObject((char*)"Aurora");
-    gameObjects.push_back(aurora);
-	aurora->CreateMesh("Assets/Models/Aurora/aurora.obj");
+    GameObject* templo2 = new GameObject((char*)"templo2");
+    gameObjects.push_back(templo2);
+    templo2->CreateMesh("Assets/Models/Oscar/templo_aire_2.fbx");
+
+    GameObject* mesa_pai_sho = new GameObject((char*)"mesa_pai_sho");
+    gameObjects.push_back(mesa_pai_sho);
+    mesa_pai_sho->CreateMesh("Assets/Models/Oscar/mesa_pai_sho.obj");
+
+    GameObject* appa = new GameObject((char*)"Appa");
+    gameObjects.push_back(appa);
+    appa->CreateMesh("Assets/Models/Oscar/appa.fbx");
+    
+    
+    
+    
+    GameObject* yumi = new GameObject((char*)"Yumi edg");
+    gameObjects.push_back(yumi);
+    yumi->CreateMesh("Assets/Models/Fernando/edg_yuumi.glb");
+    
+    GameObject* morgana = new GameObject((char*)"Morgana");
+    gameObjects.push_back(morgana);
+    morgana->CreateMesh("Assets/Models/Fernando/morgana.glb");
+    
+    GameObject* diana = new GameObject((char*)"diana");
+    gameObjects.push_back(diana);
+    diana->CreateMesh("Assets/Models/Fernando/winterblessed_diana.glb");
+
+    GameObject* dragonE = new GameObject((char*)"Dragon Elder");
+    gameObjects.push_back(dragonE);
+    dragonE->CreateMesh("Assets/Models/Fernando/dragon_(elder).glb");
+    
+    GameObject* gromp = new GameObject((char*)"Gromp");
+    gameObjects.push_back(gromp);
+    gromp->CreateMesh("Assets/Models/Fernando/gromp.glb");
+
+    GameObject* akshan = new GameObject((char*)"Akshan");
+    gameObjects.push_back(akshan);
+    akshan->CreateMesh("Assets/Models/Fernando/cyber_pop_akshan.glb");
+    /*
+    GameObject* maestroJ = new GameObject((char*)"Maestro Jhin");
+    gameObjects.push_back(maestroJ);
+    akshan->CreateMesh("Assets/Models/Fernando/maestro_jhin.glb");
+
+    GameObject* baronN = new GameObject((char*)"Baron Nashor");
+    gameObjects.push_back(baronN);
+    akshan->CreateMesh("Assets/Models/Fernando/baron.glb");
+    */
+
+    GameObject* dragon = new GameObject((char*)"dragon");
+    gameObjects.push_back(dragon);
+    dragon->CreateMesh("Assets/Models/Oscar/dragon.fbx");
+
+    GameObject* glider = new GameObject((char*)"glider");
+    gameObjects.push_back(glider);
+    glider->CreateMesh("Assets/Models/Oscar/glider.fbx");
+
+    GameObject* ba_sin_se = new GameObject((char*)"ba_sin_se");
+    gameObjects.push_back(ba_sin_se);
+    ba_sin_se->CreateMesh("Assets/Models/Oscar/ba_sin_se.obj");
+
+    GameObject* tribuA = new GameObject((char*)"tribuA");
+    gameObjects.push_back(tribuA);
+    tribuA->CreateMesh("Assets/Models/Oscar/tribu_agua.obj");
+
+    GameObject* templo1 = new GameObject((char*)"templo1");
+    gameObjects.push_back(templo1);
+    templo1->CreateMesh("Assets/Models/Oscar/templo_aire_1.obj");
+
+    GameObject* tetera = new GameObject((char*)"tetera");
+    gameObjects.push_back(tetera);
+    tetera->CreateMesh("Assets/Models/Oscar/tetera_iroh.fbx");
+
+    GameObject* carro_coles = new GameObject((char*)"carro_coles");
+    gameObjects.push_back(carro_coles);
+    carro_coles->CreateMesh("Assets/Models/Oscar/carro_coles.fbx");
+
+    GameObject* soldado = new GameObject((char*)"soldado");
+    gameObjects.push_back(soldado);
+    soldado->CreateMesh("Assets/Models/Oscar/soldado_nf.obj");
+
+    GameObject* momo = new GameObject((char*)"momo");
+    gameObjects.push_back(momo);
+    momo->CreateMesh("Assets/Models/Oscar/momo.fbx");
+
+    GameObject* prison = new GameObject((char*)"prision");
+    gameObjects.push_back(prison);
+    prison->CreateMesh("Assets/Models/Oscar/prision.obj");
+
+    if (filesystem::exists("./Assets/scene.json"))
+    {
+        Decode();
+        // Crear y configurar el GameObject
+        /*GameObject* tablero = new GameObject((char*)"Tablero");
+        gameObjects.push_back(tablero);
+        tablero->CreateMesh("Assets/Models/Tablero/tablero.obj");
+
+        GameObject* aurora = new GameObject((char*)"Aurora");
+        gameObjects.push_back(aurora);
+        aurora->CreateMesh("Assets/Models/Aurora/aurora.obj");*/
+    }
+
+    
 
 
 	GameObject* pointLight = new GameObject((char*)"Point Light", new PointLight(
@@ -324,18 +535,20 @@ int main(void) {
         glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
         meshList[0]->RenderMesh();*/
 
+
+
+        /*
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(aurora->GetModelMatrix()));
 		aurora->Render();
 		aurora->EditorTools(!EditorMode);
 
 		
-
         // Renderizaci�n del GameObject
         if (aurora->HasAnimation()) {
             aurora->Animate(deltaTime);
             glUniformMatrix4fv(boneTransformsLoc, aurora->GetBoneTransforms().size(), GL_FALSE, glm::value_ptr(aurora->GetBoneTransforms()[0]));
         }
-        
+        */
 
 
         if (!gameObjects.empty())
@@ -351,14 +564,20 @@ int main(void) {
                 gameObject->Render();
 
                 // Herramientas de edici�n (pasando el modo de edici�n como par�metro)
-                gameObject->EditorTools(!EditorMode);
+                    gameObject->EditorTools(!EditorMode);
+
+                /*if (gameObject->HasAnimation()) {
+                    gameObject->Animate(deltaTime);
+                    glUniformMatrix4fv(boneTransformsLoc, gameObject->GetBoneTransforms().size(), GL_FALSE, glm::value_ptr(gameObject->GetBoneTransforms()[0]));
+                }*/
             }
         }
 
+        /*
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(tablero->GetModelMatrix()));
         tablero->Render();
         tablero->EditorTools(!EditorMode);
-
+        */
         EndOfFrame(window.selfWindow);
     }
     //aurora->Serialize();

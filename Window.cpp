@@ -87,19 +87,19 @@ void Window::keyCallback(GLFWwindow* window, int key, int scancode, int action, 
 
 	if (key == GLFW_KEY_W && action)
 	{
-		cout << "W" << endl;
+		//cout << "W" << endl;
 	}
 	if (key == GLFW_KEY_S && action)
 	{
-		cout << "S" << endl;
+		//cout << "S" << endl;
 	}
 	if (key == GLFW_KEY_A && action)
 	{
-		cout << "A" << endl;
+		//cout << "A" << endl;
 	}
 	if (key == GLFW_KEY_D && action)
 	{
-		cout << "D" << endl;
+		//cout << "D" << endl;
 	}
 	if (key == GLFW_KEY_Q && action)
 	{

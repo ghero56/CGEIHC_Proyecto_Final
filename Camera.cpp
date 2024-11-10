@@ -51,12 +51,12 @@ void Camera::scrollControl(GLfloat yChange, GLfloat deltaTime)
 {
 	// this just updates the speed of the camera
 	// debug
-	moveSpeed += yChange * 0.05f;
+	moveSpeed += yChange * 0.5f;
 	if (moveSpeed < 0.1f) {
 		moveSpeed = 0.1f;
 	}
-	if (moveSpeed > 10.0f) {
-		moveSpeed = 10.0f;
+	if (moveSpeed > 100.0f) {
+		moveSpeed = 100.0f;
 	}
 }
 

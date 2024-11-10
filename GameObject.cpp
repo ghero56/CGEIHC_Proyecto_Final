@@ -480,30 +480,7 @@ void GameObject::Serialize(int posis) {
                 encoder.double_value(scale.y);
                 encoder.double_value(scale.z);
             encoder.end_array();
-        encoder.key("selected");
-            encoder.bool_value(selected);
-        encoder.key("showGizmos");
-            encoder.bool_value(showGizmos);
-        encoder.key("showBoundingBox");
-            encoder.bool_value(showBoundingBox);
-        encoder.key("showWireframe");
-            encoder.bool_value(showWireframe);
-        encoder.key("showNormals");
-            encoder.bool_value(showNormals);
-        encoder.key("showBones");
-            encoder.bool_value(showBones);
-        encoder.key("showSkeleton");
-            encoder.bool_value(showSkeleton);
-        encoder.key("showSkeletonJoints");
-            encoder.bool_value(showSkeletonJoints);
-        encoder.key("showSkeletonBones");
-            encoder.bool_value(showSkeletonBones);
-        encoder.key("showSkeletonNames");
-            encoder.bool_value(showSkeletonNames);
-        encoder.key("showSkeletonWeights");
-            encoder.bool_value(showSkeletonWeights);
-        encoder.key("bindScale");
-            encoder.bool_value(bindScale);
+  
         encoder.key("parent");
             if (parent != nullptr)
             {
@@ -524,6 +501,7 @@ void GameObject::Serialize(int posis) {
             else {
                 encoder.null_value();
             }
+
     encoder.end_object();
     if (posis != 0) {
         serialFile << ",";
