@@ -305,7 +305,7 @@ int main(void) {
 
     // GLFW initialization
     window = Window();
-    window.Initialize(720, 720);
+    window.Initialize(1080, 1080);
 
     glfwPollEvents();
     glfwSetInputMode(window.selfWindow, GLFW_STICKY_KEYS, GLFW_TRUE);
@@ -377,15 +377,25 @@ int main(void) {
     gameObjects.push_back(templo2);
     templo2->CreateMesh("Assets/Models/Oscar/templo_aire_2.fbx");
 
+    GameObject* pLeague = new GameObject((char*)"Pokemon League");
+    gameObjects.push_back(pLeague);
+    pLeague->CreateMesh("Assets/Models/Omar/Pokémon League.obj");
+
     GameObject* mesa_pai_sho = new GameObject((char*)"mesa_pai_sho");
     gameObjects.push_back(mesa_pai_sho);
     mesa_pai_sho->CreateMesh("Assets/Models/Oscar/mesa_pai_sho.obj");
+
+    GameObject* pMansion = new GameObject((char*)"Pokemon Mansion");
+    gameObjects.push_back(pMansion);
+    pMansion->CreateMesh("Assets/Models/Omar/Pokemon Mansion.obj");
 
     GameObject* appa = new GameObject((char*)"Appa");
     gameObjects.push_back(appa);
     appa->CreateMesh("Assets/Models/Oscar/appa.fbx");
     
-    
+    GameObject* pArena = new GameObject((char*)"Pokemon Arena");
+    gameObjects.push_back(pArena);
+    pArena->CreateMesh("Assets/Models/Omar/Mineways2Skfb.obj");
     
     
     GameObject* yumi = new GameObject((char*)"Yumi edg");
@@ -411,7 +421,7 @@ int main(void) {
     GameObject* akshan = new GameObject((char*)"Akshan");
     gameObjects.push_back(akshan);
     akshan->CreateMesh("Assets/Models/Fernando/cyber_pop_akshan.glb");
-    /*
+    
     GameObject* maestroJ = new GameObject((char*)"Maestro Jhin");
     gameObjects.push_back(maestroJ);
     akshan->CreateMesh("Assets/Models/Fernando/maestro_jhin.glb");
@@ -419,7 +429,46 @@ int main(void) {
     GameObject* baronN = new GameObject((char*)"Baron Nashor");
     gameObjects.push_back(baronN);
     akshan->CreateMesh("Assets/Models/Fernando/baron.glb");
-    */
+    
+    GameObject* pWorld = new GameObject((char*)"Pokemon World");
+    gameObjects.push_back(pWorld);
+    pWorld->CreateMesh("Assets/Models/Omar/Pokeball Place.fbx");
+
+    GameObject* pHouse = new GameObject((char*)"Pokemon House");
+    gameObjects.push_back(pHouse);
+    pHouse->CreateMesh("Assets/Models/Omar/pokehouse1.fbx");
+
+    GameObject* submarine = new GameObject((char*)"Aqua Submarine");
+    gameObjects.push_back(submarine);
+    submarine->CreateMesh("Assets/Models/Omar/submarine.obj");
+
+    GameObject* healer = new GameObject((char*)"Pokemon Healer");
+    gameObjects.push_back(healer);
+    healer->CreateMesh("Assets/Models/Omar/healer.obj");
+
+    GameObject* movil = new GameObject((char*)"PokeMovile");
+    gameObjects.push_back(movil);
+    movil->CreateMesh("Assets/Models/Omar/Van21.fbx");
+
+    GameObject* regi = new GameObject((char*)"Regirock");
+    gameObjects.push_back(regi);
+    regi->CreateMesh("Assets/Models/Omar/Regirock_marmoset.fbx");
+
+    GameObject* pMan2 = new GameObject((char*)"Pokemon Mansion 2");
+    gameObjects.push_back(pMan2);
+    pMan2->CreateMesh("Assets/Models/Omar/Pokemon League.obj");
+
+    GameObject* pCenter = new GameObject((char*)"Pokemon Center");
+    gameObjects.push_back(pCenter);
+    pCenter->CreateMesh("Assets/Models/Omar/Pokemon_Center.obj");
+
+    GameObject* pikoM = new GameObject((char*)"Pikomat");
+    gameObjects.push_back(pikoM);
+    pikoM->CreateMesh("Assets/Models/Omar/Model_1.fbx");
+
+    GameObject* groudon = new GameObject((char*)"Groudon");
+    gameObjects.push_back(groudon);
+    groudon->CreateMesh("Assets/Models/Omar/Groudon.fbx");
 
     GameObject* dragon = new GameObject((char*)"dragon");
     gameObjects.push_back(dragon);
@@ -460,6 +509,9 @@ int main(void) {
     GameObject* prison = new GameObject((char*)"prision");
     gameObjects.push_back(prison);
     prison->CreateMesh("Assets/Models/Oscar/prision.obj");
+    
+
+    
 
     if (filesystem::exists("./Assets/scene.json"))
     {
