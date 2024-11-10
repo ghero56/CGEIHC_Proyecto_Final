@@ -12,7 +12,7 @@ public:
     Texture(unsigned char* imageData, int width, int height, int channels);
     ~Texture();
 
-    bool LoadTexture(bool , bool);
+    bool LoadTexture(bool alpha, bool embedded, int imageWidth, int imageHeight);
     void UseTexture();
     void ClearTexture();
 
