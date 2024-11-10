@@ -82,6 +82,10 @@ public:
 	void set_float4(float f[4], float a, float b, float c, float d);
 	void apply_material(const aiMaterial* mtl);
 
+	glm::vec3 GetObjectPosition() { return glm::vec3(model[3][0], model[3][1], model[3][2]); }
+	glm::vec3 GetObjectFront() { return glm::vec3(model[2][0], model[2][1], model[2][2]); }
+	glm::vec3 GetCameraOffset() { return glm::vec3(0.0f, 20.0f, -20.0f); }
+
     ~GameObject();
 
 private:
