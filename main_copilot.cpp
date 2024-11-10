@@ -44,8 +44,6 @@
 
 // serialización
 #include <json.hpp>
-
-#include <cereal/archives/json.hpp>
 #include<fstream>
 
 using namespace std;
