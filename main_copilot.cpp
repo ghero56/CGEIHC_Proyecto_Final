@@ -1,49 +1,86 @@
+//-------------------- Headers --------------------//
+// OpenGL 4.6 with GLEW and GLFW
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+
+// C++ Libraries
 #include <iostream>
 #include <vector>
 #include <string>
+
+// FMOD
 #include <fmod.hpp>
+
+// ImGui
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 #include "imfilebrowser.h"
+
+// Assimp
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
+
+// creación de ventana y shaders
 #include "Window.h"
 #include "GLSL_ShaderCompiler.h"
+
+// Modelos y texturas
 #include "Mesh.h"
 #include "GameObject.h"
-#include "Light.h"
+
+// Iluminación
+#include "Skybox.h"
+// #include "Light.h"
 #include "DirectionalLight.h"
 #include "PointLight.h"
 #include "SpotLight.h"
-#include "Camera.h"
-#include <json.hpp>
 
-#include <cereal/archives/json.hpp>
+#include "Camera.h"
+
+// serialización
+#include <json.hpp>
 #include<fstream>
 
 using namespace std;
 using namespace jsoncons;
 
+//-------------------- Variables globales --------------------//
 Window window;
+Skybox skybox;
 Camera camera;
 
+// Delta time
 GLfloat deltaTime = 0.0f;
 GLfloat lastTime = 0.0f;
 static double limitFPS = 1.0 / 60.0;
 
+// GameObjects
 vector<GameObject*> gameObjects;
 vector<Mesh*> meshList;
 
+// Shaders
+vector<Shader> shaderList;
+static const char* vShader = "Assets/Shaders/vertexShader.glsl";
+static const char* fShader = "Assets/Shaders/fragmentShader.glsl";
+
+// luz direccional
+DirectionalLight mainLight;
+//para declarar varias luces de tipo pointlight
+PointLight pointLights[MAX_POINT_LIGHTS];
+SpotLight spotLights[MAX_SPOT_LIGHTS];
+unsigned int spotLightCount = 0;
+unsigned int pointLightCount = 0;
+
+// para la creación del nuevo objeto en el editor
 static char name[20] = "";
 int posis = 0;
 
+// ------------------- Funciones ------------------- //
 void NewFrame() {
     GLfloat now = glfwGetTime();
     deltaTime = now - lastTime;
@@ -52,14 +89,18 @@ void NewFrame() {
 
     glfwPollEvents();
 
-    glClearColor(0.f, .5f, 1.0f, 1.0f);
+    glClearColor(0.f, .0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    camera.keyControl(window.GetKeys(), deltaTime);
+    // handling de los controles
     camera.mouseControl(window.GetMouseX(), window.GetMouseY());
-    camera.scrollControl(window.GetScrollY(), deltaTime);
     camera.mouseButtons(window.GetMouseButtons());
 
+    camera.scrollControl(window.GetScrollY(), deltaTime);
+
+    camera.keyControl(window.GetKeys(), deltaTime);
+
+	// render de ImGui
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();   
@@ -291,6 +332,26 @@ void CreateObjects()
     meshList.push_back(obj3);
 }
 
+void CreateShaders()
+{
+    Shader* shader1 = new Shader();
+    shader1->CreateFromFiles(vShader, fShader);
+    shaderList.push_back(*shader1);
+}
+
+void CreateSkybox() {
+    std::vector<std::string> skyboxFaces;
+    skyboxFaces.push_back("Assets/Textures/Skybox/cupertin-lake_rt.tga");
+    skyboxFaces.push_back("Assets/Textures/Skybox/cupertin-lake_lf.tga");
+    skyboxFaces.push_back("Assets/Textures/Skybox/cupertin-lake_dn.tga");
+    skyboxFaces.push_back("Assets/Textures/Skybox/cupertin-lake_up.tga");
+    skyboxFaces.push_back("Assets/Textures/Skybox/cupertin-lake_bk.tga");
+    skyboxFaces.push_back("Assets/Textures/Skybox/cupertin-lake_ft.tga");
+
+    skybox = Skybox(skyboxFaces);
+}
+
+// ------------------- Main ------------------- //
 int main(void) {
     // FMOD initialization
     FMOD_RESULT result;
@@ -315,64 +376,29 @@ int main(void) {
     imgui_io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 
     // Shader compilation
-    GLuint fragmentShader = LoadShader("Assets/Shaders/FragmentShader.glsl", GL_FRAGMENT_SHADER);
-    GLuint vertexShader = LoadShader("Assets/Shaders/VertexShader.glsl", GL_VERTEX_SHADER);
-    GLuint shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram, fragmentShader);
-    glAttachShader(shaderProgram, vertexShader);
-    
-    glLinkProgram(shaderProgram);
 
-    // Verifica el programa
-    GLint success;
-    GLchar infoLog[512];
-    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-    if (!success) {
-        glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
-		cout << "Error al compilar el programa de shaders: " << infoLog << endl;
-    }
+	CreateShaders();
 
-    // Eliminar los shaders ahora que est�n vinculados al programa
-    //glDeleteShader(vertexShader);
-    //glDeleteShader(fragmentShader);
 
-    // Usar el programa de shaders antes de setear uniformes
-    // glUseProgram(shaderProgram);
-
-    // inicializaci�n de la camara
+    // inicializaciï¿½n de la camara
     camera = Camera(glm::vec3(0.0f, 3.0f, 10.0f), glm::vec3(0.0f, 1.0f, 0.0f), 990.5f, -18.0f, 50.0f, 0.5f);
 
-    // Inicializaci�n de uniforms
-    GLuint modelLoc = glGetUniformLocation(shaderProgram, "model");
-    GLuint viewLoc = glGetUniformLocation(shaderProgram, "view");
-    GLuint projectionLoc = glGetUniformLocation(shaderProgram, "projection");
-    GLuint lightSpaceMatrixLoc = glGetUniformLocation(shaderProgram, "lightSpaceMatrix");
-    GLuint boneTransformsLoc = glGetUniformLocation(shaderProgram, "boneTransforms");
-    GLuint colorLoc = glGetUniformLocation(shaderProgram, "color");
-    GLuint toffsetLoc = glGetUniformLocation(shaderProgram, "toffset");
+
+    GLuint  uniformProjection = 0, 
+            uniformModel = 0, 
+            uniformView = 0,
+            uniformEyePosition = 0,
+            uniformSpecularIntensity = 0, 
+            uniformShininess = 0, 
+            uniformColor = 0;
 
 
-
-	// Directional Light
-    GLuint dirAmbientIntensityLoc = glGetUniformLocation(shaderProgram, "directionalLight.base.ambientIntensity");
-    GLuint dirColorLoc = glGetUniformLocation(shaderProgram, "directionalLight.base.color");
-    GLuint dirDiffuseIntensityLoc = glGetUniformLocation(shaderProgram, "directionalLight.base.diffuseIntensity");
-    GLuint dirDirectionLoc = glGetUniformLocation(shaderProgram, "directionalLight.direction");
-
-    glm::mat4 model = glm::mat4(1.0f);
     glm::mat4 projection = glm::perspective(glm::radians(45.0f), (GLfloat)window.getBufferWidth() / window.getBufferHeight(), 0.1f, 10000.0f);
-    glm::mat4 lightSpaceMatrix = glm::mat4(1.0f);
-
-    // Configura los uniforms
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(camera.calculateViewMatrix()));
-    glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
-    glUniformMatrix4fv(lightSpaceMatrixLoc, 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix));
 
     GameObject* tablero = new GameObject((char*)"Tablero");
     gameObjects.push_back(tablero);
     tablero->CreateMesh("Assets/Models/Tablero/tablero.obj");
-    
+
     GameObject* templo2 = new GameObject((char*)"templo2");
     gameObjects.push_back(templo2);
     templo2->CreateMesh("Assets/Models/Oscar/templo_aire_2.fbx");
@@ -392,20 +418,20 @@ int main(void) {
     GameObject* appa = new GameObject((char*)"Appa");
     gameObjects.push_back(appa);
     appa->CreateMesh("Assets/Models/Oscar/appa.fbx");
-    
+
     GameObject* pArena = new GameObject((char*)"Pokemon Arena");
     gameObjects.push_back(pArena);
     pArena->CreateMesh("Assets/Models/Omar/Mineways2Skfb.obj");
-    
-    
+
+
     GameObject* yumi = new GameObject((char*)"Yumi edg");
     gameObjects.push_back(yumi);
     yumi->CreateMesh("Assets/Models/Fernando/edg_yuumi.glb");
-    
+
     GameObject* morgana = new GameObject((char*)"Morgana");
     gameObjects.push_back(morgana);
     morgana->CreateMesh("Assets/Models/Fernando/morgana.glb");
-    
+
     GameObject* diana = new GameObject((char*)"diana");
     gameObjects.push_back(diana);
     diana->CreateMesh("Assets/Models/Fernando/winterblessed_diana.glb");
@@ -413,7 +439,7 @@ int main(void) {
     GameObject* dragonE = new GameObject((char*)"Dragon Elder");
     gameObjects.push_back(dragonE);
     dragonE->CreateMesh("Assets/Models/Fernando/dragon_(elder).glb");
-    
+
     GameObject* gromp = new GameObject((char*)"Gromp");
     gameObjects.push_back(gromp);
     gromp->CreateMesh("Assets/Models/Fernando/gromp.glb");
@@ -421,7 +447,7 @@ int main(void) {
     GameObject* akshan = new GameObject((char*)"Akshan");
     gameObjects.push_back(akshan);
     akshan->CreateMesh("Assets/Models/Fernando/cyber_pop_akshan.glb");
-    
+
     GameObject* maestroJ = new GameObject((char*)"Maestro Jhin");
     gameObjects.push_back(maestroJ);
     akshan->CreateMesh("Assets/Models/Fernando/maestro_jhin.glb");
@@ -429,7 +455,7 @@ int main(void) {
     GameObject* baronN = new GameObject((char*)"Baron Nashor");
     gameObjects.push_back(baronN);
     akshan->CreateMesh("Assets/Models/Fernando/baron.glb");
-    
+
     GameObject* pWorld = new GameObject((char*)"Pokemon World");
     gameObjects.push_back(pWorld);
     pWorld->CreateMesh("Assets/Models/Omar/Pokeball Place.fbx");
@@ -511,7 +537,6 @@ int main(void) {
     prison->CreateMesh("Assets/Models/Oscar/prision.obj");
     
 
-    
 
     if (filesystem::exists("./Assets/scene.json"))
     {
@@ -529,26 +554,29 @@ int main(void) {
     
 
 
-	GameObject* pointLight = new GameObject((char*)"Point Light", new PointLight(
+
+    CreateSkybox();
+
+	PointLight* pointLight = new PointLight(
 		1.0f, 1.0f, 1.0f,
         1.0f, 0.1f,
         0.0f, 0.5f, 0.0f,
 		1.0f, 1.0f, 1.0f
-    ));
+    );
 
-	GameObject* spotLight = new GameObject((char*)"Spot Light", new SpotLight(
+	SpotLight* spotLight = new SpotLight(
 		1.0f, 1.0f, 1.0f,
 		1.0f, 0.1f,
 		0.0f, 0.5f, 0.0f,
 		0.0f, -1.0f, 0.0f,
 		1.0f, 0.0f, 0.0f, 20.0f
-	));
+	);
 
-	GameObject* directionalLight = new GameObject((char*)"Directional Light", new DirectionalLight(
+	DirectionalLight* directionalLight = new DirectionalLight(
 		1.0f, 1.0f, 1.0f,
 		1.0f, 0.1f,
-		0.0f, -1.0f, 0.0f
-	));
+		0.0f, -1.0f, -.5f
+	);
 
     ImGui::FileBrowser fileDialog;
     bool demoWindow = true; // quitar
@@ -558,34 +586,49 @@ int main(void) {
 
 	glfwGetTime();
 	glfwSetTime(0.0);
-    
-    glm::vec3 color = glm::vec3(1.0f, 1.0f, 1.0f);
 
     while (!glfwWindowShouldClose(window.selfWindow)) {
         
         NewFrame();
-        
-        
-        glUseProgram(shaderProgram);
-        glActiveTexture(GL_TEXTURE0);
 
-        if (EditorMode)     
+        if (EditorMode)
             EditorTools(&demoWindow, &fileDialog);
 
-        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(camera.calculateViewMatrix()));
-        glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
-        glUniformMatrix4fv(lightSpaceMatrixLoc, 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix));
+        skybox.DrawSkybox(camera.calculateViewMatrix(), projection);
+        shaderList[0].UseShader();
+        uniformModel = shaderList[0].GetModelLocation();
+        uniformProjection = shaderList[0].GetProjectionLocation();
+        uniformView = shaderList[0].GetViewLocation();
+        uniformEyePosition = shaderList[0].GetEyePositionLocation();
+        uniformColor = shaderList[0].getColorLocation();
+
+        //información en el shader de intensidad especular y brillo
+        uniformSpecularIntensity = shaderList[0].GetSpecularIntensityLocation();
+        uniformShininess = shaderList[0].GetShininessLocation();
         
-        glUniform3fv(colorLoc, 1, glm::value_ptr(color));
+        glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(camera.calculateViewMatrix()));
+        glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
+        glUniform3f(uniformEyePosition, camera.getCameraPosition().x, camera.getCameraPosition().y, camera.getCameraPosition().z);
+        
+        // borrar, la luz pegada a la cámara
+        glm::vec3 lowerLight = camera.getCameraPosition();
+        lowerLight.y -= 0.3f;
+        spotLights[0].SetFlash(lowerLight, camera.getCameraDirection());
+
+        
         // Directional Light
-		directionalLight->UseLight(dirAmbientIntensityLoc, dirColorLoc, dirDiffuseIntensityLoc, dirDirectionLoc);
-        pointLight->UseLight(dirAmbientIntensityLoc, dirColorLoc, dirDiffuseIntensityLoc, dirDirectionLoc);
-		spotLight->UseLight(dirAmbientIntensityLoc, dirColorLoc, dirDiffuseIntensityLoc, dirDirectionLoc);
+        shaderList[0].SetDirectionalLight(directionalLight);
+        shaderList[0].SetPointLights(pointLights, pointLightCount);
+        shaderList[0].SetSpotLights(spotLights, spotLightCount);
         
-		/*model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
-        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-        meshList[0]->RenderMesh();*/
+		glm::mat4 model(1.0);
+        glm::mat4 modelaux(1.0);
+        glm::vec3 color = glm::vec3(1.0f, 1.0f, 1.0f);
+
+        glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
+        glUniform3fv(uniformColor, 1, glm::value_ptr(color));
+        meshList[0]->RenderMesh();
+
 
 
 
@@ -595,7 +638,8 @@ int main(void) {
 		aurora->EditorTools(!EditorMode);
 
 		
-        // Renderizaci�n del GameObject
+        // Renderizaciï¿½n del GameObject
+
         if (aurora->HasAnimation()) {
             aurora->Animate(deltaTime);
             glUniformMatrix4fv(boneTransformsLoc, aurora->GetBoneTransforms().size(), GL_FALSE, glm::value_ptr(aurora->GetBoneTransforms()[0]));
@@ -608,14 +652,14 @@ int main(void) {
             for (auto& gameObject : gameObjects)
             {
                 // Actualizar la matriz de modelo en el shader
-                glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(gameObject->GetModelMatrix()));
+                glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(gameObject->GetModelMatrix()));
 
                 //gameObjects.push_back(gameObject);
 
                 // Renderizar el objeto
                 gameObject->Render();
 
-                // Herramientas de edici�n (pasando el modo de edici�n como par�metro)
+                // Herramientas de ediciï¿½n (pasando el modo de ediciï¿½n como parï¿½metro)
                     gameObject->EditorTools(!EditorMode);
 
                 /*if (gameObject->HasAnimation()) {
@@ -625,8 +669,10 @@ int main(void) {
             }
         }
 
+
         /*
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(tablero->GetModelMatrix()));
+
         tablero->Render();
         tablero->EditorTools(!EditorMode);
         */

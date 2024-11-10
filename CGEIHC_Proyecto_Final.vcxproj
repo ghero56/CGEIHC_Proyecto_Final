@@ -164,6 +164,8 @@ xcopy /y /d "lib\assimp\*.dll" "$(OutDir)"
     <ClCompile Include="main_copilot.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="PointLight.cpp" />
+    <ClCompile Include="Shader.cpp" />
+    <ClCompile Include="Skybox.cpp" />
     <ClCompile Include="SpotLight.cpp" />
     <ClCompile Include="stb_image.cpp" />
     <ClCompile Include="Texture.cpp" />
@@ -190,13 +192,16 @@ xcopy /y /d "lib\assimp\*.dll" "$(OutDir)"
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="PointLight.h" />
     <ClInclude Include="Raycast.h" />
+    <ClInclude Include="Skybox.h" />
     <ClInclude Include="SpotLight.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="Window.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Models\aurora.glb" />
-    <None Include="Assets\Shaders\FragmentShader.glsl" />
+    <None Include="Assets\Shaders\fragmentShader.glsl" />
+    <None Include="Assets\Shaders\skyboxFragmentShader.glsl" />
+    <None Include="Assets\Shaders\skyboxVertexShader.glsl" />
     <None Include="Assets\Shaders\vertexShader.glsl" />
   </ItemGroup>
   <ItemGroup>

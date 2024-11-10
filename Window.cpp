@@ -8,29 +8,24 @@ Window::Window() {
 	std::fill(std::begin(keys), std::end(keys), false);
 }
 
-Window::~Window() {
-	glfwTerminate();
-}
-
 int Window::Initialize(int rx, int ry) {
+	width = rx;
+	height = ry;
 	if (!glfwInit())
 	{
 		cout << "Fallo en inicializar GLFW" << endl;
 		return 1;
 	}
 
-	bufferHeight = ry;
-	bufferWidth = rx;
-
-	lastX = bufferWidth / 2.0;
-	lastY = bufferHeight / 2.0;
+	lastX = width/ 2.0;
+	lastY = height / 2.0;
 
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 	/* Create a windowed mode window and its OpenGL context */
-	selfWindow = glfwCreateWindow(rx, ry, "Proyecto Final CGEIHC 2025-1", NULL, NULL);
+	selfWindow = glfwCreateWindow(width, height, "Proyecto Final CGEIHC 2025-1", NULL, NULL);
 
 	if (!selfWindow)
 	{
@@ -38,18 +33,20 @@ int Window::Initialize(int rx, int ry) {
 		glfwTerminate();
 		return 1;
 	}
-	//Obtener tamaño de Buffer
+	//Obtener tamaÃ±o de Buffer
 	glfwGetFramebufferSize(selfWindow, &bufferWidth, &bufferHeight);
 
 	//asignar el contexto
 	glfwMakeContextCurrent(selfWindow);
+
+	callBacks();
 
 	//permitir nuevas extensiones
 	glewExperimental = GL_TRUE;
 
 	if (glewInit() != GLEW_OK)
 	{
-		printf("Falló inicialización de GLEW");
+		printf("FallÃ³ inicializaciÃ³n de GLEW");
 		glfwDestroyWindow(selfWindow);
 		glfwTerminate();
 		return 1;
@@ -60,10 +57,10 @@ int Window::Initialize(int rx, int ry) {
 
 	//Asignar Viewport
 	glViewport(0, 0, bufferWidth, bufferHeight);
-	//Callback para detectar que se está usando la ventana
+	//Callback para detectar que se estÃ¡ usando la ventana
 	glfwSetWindowUserPointer(selfWindow, this);
 
-	callBacks();
+	
 
 	// Setup Dear ImGui context
 	IMGUI_CHECKVERSION();
@@ -71,8 +68,6 @@ int Window::Initialize(int rx, int ry) {
 	ImGui::StyleColorsDark();
 	ImGui_ImplGlfw_InitForOpenGL(selfWindow, true);
 	ImGui_ImplOpenGL3_Init("#version 460");
-
-	
 }
 
 void Window::callBacks() {
@@ -85,30 +80,7 @@ void Window::callBacks() {
 void Window::keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
 	Window* theWindow = static_cast<Window*>(glfwGetWindowUserPointer(window));
 
-	if (key == GLFW_KEY_W && action)
-	{
-		//cout << "W" << endl;
-	}
-	if (key == GLFW_KEY_S && action)
-	{
-		//cout << "S" << endl;
-	}
-	if (key == GLFW_KEY_A && action)
-	{
-		//cout << "A" << endl;
-	}
-	if (key == GLFW_KEY_D && action)
-	{
-		//cout << "D" << endl;
-	}
-	if (key == GLFW_KEY_Q && action)
-	{
-		cout << "Q" << endl;
-	}
-	if (key == GLFW_KEY_E && action)
-	{
-		cout << "E" << endl;
-	}
+
 
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 	{
@@ -129,8 +101,8 @@ void Window::keyCallback(GLFWwindow* window, int key, int scancode, int action, 
 		}
 	}
 
-	// Método de crear nuevo GameObject
-	// Método de entrar y salir del modo editor
+	// MÃ©todo de crear nuevo GameObject
+	// MÃ©todo de entrar y salir del modo editor
 }
 
 void Window::cursorPosCallback(GLFWwindow* window, double xpos, double ypos) {
@@ -142,7 +114,7 @@ void Window::cursorPosCallback(GLFWwindow* window, double xpos, double ypos) {
 		theWindow->mouseHasMoved = false;
 	}
 
-	// Calcula el cambio en la posición del mouse
+	// Calcula el cambio en la posiciÃ³n del mouse
 	theWindow->mouse_x = xpos - theWindow->lastX;
 	theWindow->mouse_y = theWindow->lastY - ypos;
 
@@ -203,4 +175,8 @@ GLfloat Window::GetScrollY() {
 	GLfloat TNY = scroll_y;
 	scroll_y = 0.0f;
 	return TNY;
+}
+
+Window::~Window() {
+	glfwTerminate();
 }

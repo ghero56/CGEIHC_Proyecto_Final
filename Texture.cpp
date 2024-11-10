@@ -4,7 +4,18 @@
 
 using namespace std;
 
+Texture::Texture()
+{
+	imageData = nullptr;
+    textureID = 0;
+    width = 0;
+    height = 0;
+    bitDepth = 0;
+    filePath = "";
+}
+
 Texture::Texture(const std::string& filePath) {
+	imageData = nullptr;
     this->filePath = filePath;
     textureID = 0;
     width = 0;
@@ -21,17 +32,15 @@ Texture::Texture(unsigned char* imageData, int width, int height, int channels) 
     this->bitDepth = channels;
 }
 
-Texture::~Texture() {
-    ClearTexture();
-}
-
-bool Texture::LoadTexture(bool alpha, bool embedded) {
-	cout << "Loading texture: " << filePath << endl;
+bool Texture::LoadTexture(bool alpha, bool embedded, int imageWidth, int imageHeight) {
+	cout << "\nLoading texture: " << filePath << endl;
 	cout << "Alpha: " << alpha << endl;
 	cout << "Embedded: " << embedded << endl;
 
-    stbi_set_flip_vertically_on_load(true);
+    //stbi_set_flip_vertically_on_load(true);
 	if (embedded) {
+		width = imageWidth;
+		height = imageHeight;
 		if (!imageData) {
 			std::cout << "Failed to find textures: " << filePath << std::endl;
 			return false;
@@ -44,6 +53,12 @@ bool Texture::LoadTexture(bool alpha, bool embedded) {
             return false;
         }
     }
+
+    // let's check if our imageData is not corrupted or null
+	if (imageData == NULL) {
+		std::cout << "Failed to load texture" << std::endl;
+		return false;
+	}
     
     glGenTextures(1, &textureID);
     glBindTexture(GL_TEXTURE_2D, textureID);
@@ -56,22 +71,31 @@ bool Texture::LoadTexture(bool alpha, bool embedded) {
     glTexImage2D(GL_TEXTURE_2D, 0, alpha ? GL_RGBA : GL_RGB, width, height, 0, alpha ? GL_RGBA : GL_RGB, GL_UNSIGNED_BYTE, imageData);
     glGenerateMipmap(GL_TEXTURE_2D);
 
-    stbi_image_free(imageData);
+    //stbi_image_free(imageData);
     glBindTexture(GL_TEXTURE_2D, 0);
+
+	UseTexture();
 
     return true;
 }
 
 void Texture::UseTexture() {
 	//cout << "Texture ID: " << textureID << endl;
-    glActiveTexture(GL_TEXTURE0);
+    // glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, textureID);
 }
 
-void Texture::ClearTexture() {
+void Texture::ClearTexture()
+{
     glDeleteTextures(1, &textureID);
     textureID = 0;
     width = 0;
     height = 0;
     bitDepth = 0;
+    filePath = "";
+}
+
+Texture::~Texture()
+{
+    ClearTexture();
 }
