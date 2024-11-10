@@ -15,82 +15,51 @@ void Camera::keyControl(bool* keys, GLfloat deltaTime)
 {
 	GLfloat velocity = moveSpeed * deltaTime;
 	if (EnableMovementKeys) {
-		
-		if (keys[GLFW_KEY_W]) {
-			position += front * velocity; 
-		}
-		
-		if (keys[GLFW_KEY_S])
-		{
-			position -= front * velocity;
-		}
-		
-		if (keys[GLFW_KEY_A])
-		{
-			position -= right * velocity;
-		}
-		
-		if (keys[GLFW_KEY_D])
-		{
-			position += right * velocity;
-		}
-		
-		if (keys[GLFW_KEY_Q])
-		{
-			position -= up * velocity;
-		}
-		
-		if (keys[GLFW_KEY_E]) 
-		{
-			position += up * velocity;
-		}
+		if (keys[GLFW_KEY_W]) position += front * velocity;
+
+		if (keys[GLFW_KEY_S]) position -= front * velocity;
+
+		if (keys[GLFW_KEY_A]) position -= right * velocity;
+
+		if (keys[GLFW_KEY_D]) position += right * velocity;
+
+		if (keys[GLFW_KEY_Q]) position -= up * velocity;
+
+		if (keys[GLFW_KEY_E]) position += up * velocity;
 	}
 }
 
 void Camera::scrollControl(GLfloat yChange, GLfloat deltaTime)
 {
-	// this just updates the speed of the camera
-	// debug
+	// cambiamos la velocidad de la cámara
 	moveSpeed += yChange * 0.05f;
-	if (moveSpeed < 0.1f) {
-		moveSpeed = 0.1f;
-	}
-	if (moveSpeed > 10.0f) {
-		moveSpeed = 10.0f;
-	}
+	if (moveSpeed < 0.1f) moveSpeed = 0.1f;
+	if (moveSpeed > 10.0f) moveSpeed = 10.0f;
 }
 
 void Camera::mouseButtons(int* buttons)
 {
 	EnableMovementKeys = buttons[GLFW_MOUSE_BUTTON_RIGHT] == 1;
 	scrollableWindow = buttons[GLFW_MOUSE_BUTTON_LEFT] == 1;
-
-	if (scrollableWindow || EnableMovementKeys) {
-		glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-	}
-	else {
-		glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-	}
+	// ocultamos el mouse
+	if (scrollableWindow || EnableMovementKeys) glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);	
+	else glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 }
 
 void Camera::mouseControl(GLfloat xChange, GLfloat yChange) {
-	xChange *= turnSpeed;
-	yChange *= turnSpeed;
-
 	if (!EnableMovementKeys) return;
 
-	// Verifica si el cambio es significativo para evitar deslizamientos
-	const float threshold = 0.0001f;
-	if (fabs(xChange) > threshold || fabs(yChange) > threshold) {
-		yaw += xChange;
-		pitch += yChange;
+	xChange *= turnSpeed;
+	yChange *= turnSpeed;
+	
+	yaw += xChange;
+	pitch += yChange;
 
-		// Limita el pitch para evitar la inversión de la cámara
-		if (pitch > 89.0f) pitch = 89.0f;
-		if (pitch < -89.0f) pitch = -89.0f;
+	// Limita el pitch para evitar la inversión de la cámara
+	if (pitch > 89.0f) pitch = 89.0f;
+	if (pitch < -89.0f) pitch = -89.0f;
 
-		update();  // Actualiza la dirección de la cámara
-	}
+	update();  // Actualiza la dirección de la cámara	
 }
 
 glm::mat4 Camera::calculateViewMatrix()
@@ -110,7 +79,6 @@ glm::vec3 Camera::getCameraDirection()
 
 void Camera::update() {
 	// Calcula el nuevo vector front
-	glm::vec3 front;
 	if (scrollableWindow) {
 		front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
 		front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
@@ -119,13 +87,12 @@ void Camera::update() {
 		front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
 		front.y = sin(glm::radians(pitch));
 		front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+		front = glm::normalize(front);
 	}
-	
-	this->front = glm::normalize(front);
 
 	// Recalcula el vector right y el vector up
-	right = glm::normalize(glm::cross(this->front, worldUp));
-	up = glm::normalize(glm::cross(right, this->front));
+	right = glm::normalize(glm::cross(front, worldUp));
+	up = glm::normalize(glm::cross(right, front));
 }
 
 void Camera::Debug()

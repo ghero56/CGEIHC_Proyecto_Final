@@ -10,7 +10,7 @@ GameObject::GameObject(char* name):
     showWireframe(false), showNormals(false), showBones(false), showSkeleton(false),
     showSkeletonJoints(false), showSkeletonBones(false), showSkeletonNames(false),
     showSkeletonWeights(false), showSelfWindow(false), soundSystem(nullptr),
-    sound(nullptr), channel(nullptr), parent(nullptr), animator(nullptr), light(nullptr) {
+    sound(nullptr), channel(nullptr), parent(nullptr), animator(nullptr) {
 
 	animations.clear();
 
@@ -27,7 +27,7 @@ GameObject::GameObject(char* name, GameObject* parent) :
     showWireframe(false), showNormals(false), showBones(false), showSkeleton(false),
     showSkeletonJoints(false), showSkeletonBones(false), showSkeletonNames(false),
     showSkeletonWeights(false), showSelfWindow(false), soundSystem(nullptr),
-    sound(nullptr), channel(nullptr), parent(parent), animator(nullptr), light(nullptr) {
+    sound(nullptr), channel(nullptr), parent(parent), animator(nullptr) {
 
     animations.clear();
 
@@ -44,7 +44,7 @@ GameObject::GameObject() :
     showWireframe(false), showNormals(false), showBones(false), showSkeleton(false),
     showSkeletonJoints(false), showSkeletonBones(false), showSkeletonNames(false),
     showSkeletonWeights(false), showSelfWindow(false), soundSystem(nullptr),
-    sound(nullptr), channel(nullptr), parent(nullptr), animator(nullptr), light(nullptr) {
+    sound(nullptr), channel(nullptr), parent(nullptr), animator(nullptr){
 
     animations.clear();
 
@@ -56,28 +56,7 @@ GameObject::GameObject() :
     model = glm::mat4(1.0f);
 }
 
-GameObject::GameObject(char* name, Light* light) {
-	this->name = name;
-	this->light = light;
-}
-
-GameObject::GameObject(char* name, GameObject* parent, Light* light) {
-	this->name = name;
-	this->light = light;
-	this->parent = parent;
-}
-
-void GameObject::UseLight(GLuint ambientIntensityLocation, GLuint ambientColorLocation, GLuint diffuseIntensityLocation, GLuint directionLocation) {
-    if (!light)
-        return;
-	light->UseLight(ambientIntensityLocation, ambientColorLocation, diffuseIntensityLocation, directionLocation);
-}
-
 void GameObject::SetPosition(const glm::vec3& newPosition) {
-    if (light) {
-        light->SetPosition(newPosition);
-		return;
-    }
     position = newPosition;
     // Actualiza la matriz de modelo cuando la posición cambia
     model = glm::translate(glm::mat4(1.0f), position) * glm::mat4_cast(glm::quat(rotation)) * glm::scale(glm::mat4(1.0f), scale);
@@ -124,15 +103,16 @@ void GameObject::CreateMesh(const std::string& filename) {
 
     if (!scene) {
 		cout << "Failed to load model: " << filename << endl;
+		cout << "Error: " << importer.GetErrorString() << endl;
         return;
     }
+
+	glBindVertexArray(0);
 
     LoadNode(scene->mRootNode, scene);
     LoadMaterials(scene);
 
     // vamos a usar las texturas
-
-
     if (scene->mAnimations != nullptr) {
         // Cargar animaciones, si existen
 		for (unsigned int i = 0; i < scene->mNumAnimations; i++)
@@ -187,6 +167,7 @@ void GameObject::Render() {
         }
         mesh[i]->RenderMesh();
 	}
+
     for (auto& child : children) {
         child->Render();
     }
@@ -278,20 +259,20 @@ void GameObject::LoadMaterials(const aiScene* scene) {
                     // Lógica para cargar textura embebida...
                 }
                 else {
-                    std::string pathStr = path.C_Str();
+                    string pathStr = path.C_Str();
                     int idx = pathStr.rfind("\\");
-                    std::string filename = pathStr.substr(idx + 1);
-                    std::string texPath = "Assets/Textures/" + filename;
+                    string filename = pathStr.substr(idx + 1);
+                    string texPath = "Assets/Textures/" + filename;
                     textureList[i] = new Texture(texPath.c_str());
 
                     bool hasAlpha = (filename.find("tga") != std::string::npos || filename.find("png") != std::string::npos);
                     if (!textureList[i]->LoadTexture(hasAlpha, false)) {
-                        std::cout << "Falló en cargar la Textura: " << texPath << std::endl;
+                        cout << "Falló en cargar la Textura: " << texPath << std::endl;
                         delete textureList[i];
                         textureList[i] = nullptr;
                     }
                     else {
-                        std::cout << "Textura cargada: " << texPath << std::endl;
+                        cout << "Textura cargada: " << texPath << std::endl;
                     }
                 }
             }
@@ -394,9 +375,6 @@ GameObject::~GameObject() {
     }
     if (animator) {
         delete animator;
-    }
-    if (light) {
-        delete light;
     }
     for (auto& child : children) {
         delete child;

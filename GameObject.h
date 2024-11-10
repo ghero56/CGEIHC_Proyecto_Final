@@ -18,7 +18,6 @@
 #include "include/stb/stb_image.h"
 #include "Animation.h"
 #include "Animator.h"
-#include "Light.h"
 
 using namespace std;
 
@@ -27,12 +26,6 @@ public:
     GameObject();
     GameObject(char*);
     GameObject(char* name, GameObject* parent);
-
-    // a gameObject can be also a kind of light
-	GameObject(char* name, Light* light);
-	GameObject(char* name, GameObject* parent, Light* light);
-
-    
 
     void Animate(float deltaTime);
 
@@ -91,8 +84,6 @@ private:
     // el animador y sus animaciones
     vector<Animation*> animations;
     Animator* animator;	
-
-	Light* light;               // luz asociada al objeto
 
     bool selected;
     bool showGizmos;
