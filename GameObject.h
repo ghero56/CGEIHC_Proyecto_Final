@@ -81,6 +81,7 @@ public:
 
     void UseLight(GLuint , GLuint , GLuint , GLuint );
 
+	string GetName() const { return name; }
 
     void Serialize(int posis);
 
