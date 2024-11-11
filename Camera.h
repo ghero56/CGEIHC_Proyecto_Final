@@ -21,10 +21,19 @@ public:
 	void mouseControl(GLfloat xChange, GLfloat yChange);
 	void mouseButtons(int* buttons);
 	void scrollControl(GLfloat yChange, GLfloat deltaTime);
+	void dragControl(GLfloat xChange, GLfloat yChange, GLfloat deltaTime);
 
 	glm::vec3 getCameraPosition();
 	glm::vec3 getCameraDirection();
 	glm::mat4 calculateViewMatrix();
+
+	void SetPosition(glm::vec3 pos) { position = pos; }
+	void SetFront(glm::vec3 fr) { front = fr; }
+	void SetUp(glm::vec3 u) { up = u; }
+	void SetYaw(GLfloat y) { yaw = y; }
+	void SetPitch(GLfloat p) { pitch = p; }
+
+	void SetClampCamera(bool clamp) { clampCamera = clamp; }
 
 	void Debug();
 
@@ -37,7 +46,9 @@ private:
 	glm::vec3 right;
 	glm::vec3 worldUp;
 	bool EnableMovementKeys = false;
-	bool scrollableWindow = false;
+	bool ScrollableWindow = false;
+	bool DragWindow = false;
+	bool clampCamera = false;
 	GLfloat yaw;
 	GLfloat pitch;
 

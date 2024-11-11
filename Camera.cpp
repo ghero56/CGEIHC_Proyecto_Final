@@ -31,20 +31,26 @@ void Camera::keyControl(bool* keys, GLfloat deltaTime)
 
 void Camera::scrollControl(GLfloat yChange, GLfloat deltaTime)
 {
-
-	// cambiamos la velocidad de la cámara
-	moveSpeed += yChange * 0.5f;
-	if (moveSpeed < 0.1f) moveSpeed = 0.1f;
-	if (moveSpeed > 100.0f) moveSpeed = 100.0f;
-
+	if (EnableMovementKeys) {
+		// cambiamos la velocidad de la c�mara
+		moveSpeed += yChange * .5f;
+		if (moveSpeed < 0.1f) moveSpeed = 0.1f;
+		if (moveSpeed > 100.0f) moveSpeed = 100.0f;
+	}
+	else if(ScrollableWindow){
+		// movemos la c�mara hacia adelante o hacia atr�s
+		GLfloat velocity = moveSpeed * deltaTime;
+		position += front * yChange * velocity;
+	}
 }
 
 void Camera::mouseButtons(int* buttons)
 {
 	EnableMovementKeys = buttons[GLFW_MOUSE_BUTTON_RIGHT] == 1;
-	scrollableWindow = buttons[GLFW_MOUSE_BUTTON_LEFT] == 1;
+	ScrollableWindow = buttons[GLFW_MOUSE_BUTTON_LEFT] == 1;
+	DragWindow = buttons[GLFW_MOUSE_BUTTON_MIDDLE] == 1;
 	// ocultamos el mouse
-	if (scrollableWindow || EnableMovementKeys) glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);	
+	if (DragWindow || ScrollableWindow || EnableMovementKeys) glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	else glfwSetInputMode(glfwGetCurrentContext(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 }
 
@@ -53,7 +59,7 @@ void Camera::mouseControl(GLfloat xChange, GLfloat yChange) {
 
 	xChange *= turnSpeed;
 	yChange *= turnSpeed;
-	
+
 	yaw += xChange;
 	pitch += yChange;
 
@@ -62,6 +68,15 @@ void Camera::mouseControl(GLfloat xChange, GLfloat yChange) {
 	if (pitch < -89.0f) pitch = -89.0f;
 
 	update();  // Actualiza la dirección de la cámara	
+}
+
+void Camera::dragControl(GLfloat xChange, GLfloat yChange, GLfloat deltaTime)
+{
+	if (!DragWindow) return;
+
+	GLfloat velocity = moveSpeed * deltaTime * turnSpeed;
+	position += right * xChange * velocity;
+	position += up * yChange * velocity;
 }
 
 glm::mat4 Camera::calculateViewMatrix()
@@ -80,8 +95,9 @@ glm::vec3 Camera::getCameraDirection()
 }
 
 void Camera::update() {
+	if (clampCamera) return;
 	// Calcula el nuevo vector front
-	if (scrollableWindow) {
+	if (ScrollableWindow) {
 		front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
 		front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
 	}

@@ -10,8 +10,13 @@ public:
 		GLfloat aIntensity, GLfloat dIntensity,
 		GLfloat xDir, GLfloat yDir, GLfloat zDir);
 
-	void UseLight(GLfloat ambientIntensityLocation, GLfloat ambientcolorLocation,
-		GLfloat diffuseIntensityLocation, GLfloat directionLocation);
+	DirectionalLight(GLfloat* color, GLfloat aIntensity, GLfloat dIntensity,
+		GLfloat* dir);
+
+	void UseLight(GLfloat ambientIntensityLocation, GLfloat ambientcolorLocation, GLfloat diffuseIntensityLocation, GLfloat directionLocation);
+
+	void SetDirection(glm::vec3 dir) { direction = dir; }
+	glm::vec3 GetDirection() { return direction; }
 
 	~DirectionalLight();
 

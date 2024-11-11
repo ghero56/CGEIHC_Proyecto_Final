@@ -192,6 +192,7 @@ xcopy /y /d "lib\assimp\*.dll" "$(OutDir)"
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="PointLight.h" />
     <ClInclude Include="Raycast.h" />
+    <ClInclude Include="SceneManager.h" />
     <ClInclude Include="Skybox.h" />
     <ClInclude Include="SpotLight.h" />
     <ClInclude Include="Texture.h" />
