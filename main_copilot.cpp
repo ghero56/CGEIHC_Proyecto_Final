@@ -78,7 +78,16 @@ unsigned int pointLightCount = 0;
 
 // para la creación del nuevo objeto en el editor
 static char name[20] = "";
+
+// para serialización correcta
 int posis = 0;
+
+// para la animación
+int casilla;
+int posisArreglo=0;
+bool vertical = true;
+bool girar = false;
+GLfloat tiempo;
 
 // ------------------- Funciones ------------------- //
 void NewFrame( ) {
@@ -595,14 +604,6 @@ int main(void) {
     if (filesystem::exists("./Assets/scene.json"))
     {
         Decode();
-        // Crear y configurar el GameObject
-        /*GameObject* tablero = new GameObject((char*)"Tablero");
-        gameObjects.push_back(tablero);
-        tablero->CreateMesh("Assets/Models/Tablero/tablero.obj");
-
-        GameObject* aurora = new GameObject((char*)"Aurora");
-        gameObjects.push_back(aurora);
-        aurora->CreateMesh("Assets/Models/Aurora/aurora.obj");*/
     }
     
     CreateSkybox();
@@ -622,6 +623,11 @@ int main(void) {
 
 	glfwGetTime();
 	glfwSetTime(0.0);
+
+    GLfloat now = glfwGetTime();
+    deltaTime = now - lastTime;
+    deltaTime += (now - lastTime) / limitFPS;
+    lastTime = now;
 
     while (!glfwWindowShouldClose(window.selfWindow)) {
         
@@ -676,6 +682,12 @@ int main(void) {
         uniformEyePosition = shaderList[0].GetEyePositionLocation();
         uniformColor = shaderList[0].getColorLocation();
 
+        //Manejo de animaciones
+        GLfloat now = glfwGetTime();
+        deltaTime = now - lastTime;
+        deltaTime += (now - lastTime) / limitFPS;
+        lastTime = now;
+
         //información en el shader de intensidad especular y brillo
         uniformSpecularIntensity = shaderList[0].GetSpecularIntensityLocation();
         uniformShininess = shaderList[0].GetShininessLocation();
@@ -705,6 +717,48 @@ int main(void) {
         {
             for (auto& gameObject : gameObjects)
             {
+
+                if (posisArreglo==casilla)
+                {
+                    glm::vec3 movement = gameObject->GetPosition();
+                    glm::vec3 rotation = gameObject->GetRotation();
+
+                    if (!girar) {
+                        if (vertical) {
+                            if (movement.y < 30.0f) {
+                                movement.y += 0.3f;
+                            }
+                            else {
+                                vertical = !vertical;
+                                tiempo = glfwGetTime();
+                            }
+                        }
+                        else {
+                            if (glfwGetTime() > tiempo + 3.0f) {
+                                girar = !girar;
+                            }
+                            else {
+                                rotation.y += 5.0f;
+                            }
+                        }
+                    }
+                    else {
+                        if (movement.y > -30.0f) {
+                            movement.y -= 0.3f;
+                            rotation.y = 0;
+                        }
+                        else {
+                            casilla=-1;
+                        }
+                    }
+
+                    
+                    gameObject->SetPosition(movement);
+                    gameObject->SetRotation(rotation);
+
+                    
+                }
+
                 // Actualizar la matriz de modelo en el shader
                 glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(gameObject->GetModelMatrix()));
                 //gameObjects.push_back(gameObject);
@@ -714,7 +768,9 @@ int main(void) {
                 
                 // Herramientas de ediciï¿½n (pasando el modo de ediciï¿½n como parï¿½metro)
                 gameObject->EditorTools(!EditorMode);
+                posisArreglo++;
             }
+            posisArreglo = 0;
         }
 
         EndOfFrame(window.selfWindow);
