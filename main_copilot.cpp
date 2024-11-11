@@ -83,7 +83,7 @@ static char name[20] = "";
 int posis = 0;
 
 // para la animación
-int casilla;
+int casilla = 30;
 int posisArreglo=0;
 bool vertical = true;
 bool girar = false;
@@ -770,7 +770,7 @@ int main(void) {
                 gameObject->EditorTools(!EditorMode);
                 posisArreglo++;
             }
-            posisArreglo = -1;
+            posisArreglo = 0;
         }
 
         EndOfFrame(window.selfWindow);
