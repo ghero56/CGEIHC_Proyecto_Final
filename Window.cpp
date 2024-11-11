@@ -33,7 +33,7 @@ int Window::Initialize(int rx, int ry) {
 		glfwTerminate();
 		return 1;
 	}
-	//Obtener tamaÒo de Buffer
+	//Obtener tama√±o de Buffer
 	glfwGetFramebufferSize(selfWindow, &bufferWidth, &bufferHeight);
 
 	//asignar el contexto
@@ -46,7 +46,7 @@ int Window::Initialize(int rx, int ry) {
 
 	if (glewInit() != GLEW_OK)
 	{
-		printf("FallÛ inicializaciÛn de GLEW");
+		printf("Fall√≥ inicializaci√≥n de GLEW");
 		glfwDestroyWindow(selfWindow);
 		glfwTerminate();
 		return 1;
@@ -57,7 +57,7 @@ int Window::Initialize(int rx, int ry) {
 
 	//Asignar Viewport
 	glViewport(0, 0, bufferWidth, bufferHeight);
-	//Callback para detectar que se est· usando la ventana
+	//Callback para detectar que se est√° usando la ventana
 	glfwSetWindowUserPointer(selfWindow, this);
 
 	
@@ -80,6 +80,8 @@ void Window::callBacks() {
 void Window::keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
 	Window* theWindow = static_cast<Window*>(glfwGetWindowUserPointer(window));
 
+
+
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 	{
 		glfwSetWindowShouldClose(window, GL_TRUE);
@@ -99,8 +101,8 @@ void Window::keyCallback(GLFWwindow* window, int key, int scancode, int action, 
 		}
 	}
 
-	// MÈtodo de crear nuevo GameObject
-	// MÈtodo de entrar y salir del modo editor
+	// M√©todo de crear nuevo GameObject
+	// M√©todo de entrar y salir del modo editor
 }
 
 void Window::cursorPosCallback(GLFWwindow* window, double xpos, double ypos) {
@@ -112,7 +114,7 @@ void Window::cursorPosCallback(GLFWwindow* window, double xpos, double ypos) {
 		theWindow->mouseHasMoved = false;
 	}
 
-	// Calcula el cambio en la posiciÛn del mouse
+	// Calcula el cambio en la posici√≥n del mouse
 	theWindow->mouse_x = xpos - theWindow->lastX;
 	theWindow->mouse_y = theWindow->lastY - ypos;
 

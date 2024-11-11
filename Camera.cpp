@@ -32,13 +32,13 @@ void Camera::keyControl(bool* keys, GLfloat deltaTime)
 void Camera::scrollControl(GLfloat yChange, GLfloat deltaTime)
 {
 	if (EnableMovementKeys) {
-		// cambiamos la velocidad de la cámara
+		// cambiamos la velocidad de la cï¿½mara
 		moveSpeed += yChange * .5f;
 		if (moveSpeed < 0.1f) moveSpeed = 0.1f;
-		if (moveSpeed > 90.0f) moveSpeed = 90.0f;
+		if (moveSpeed > 100.0f) moveSpeed = 100.0f;
 	}
 	else if(ScrollableWindow){
-		// movemos la cámara hacia adelante o hacia atrás
+		// movemos la cï¿½mara hacia adelante o hacia atrï¿½s
 		GLfloat velocity = moveSpeed * deltaTime;
 		position += front * yChange * velocity;
 	}
@@ -63,11 +63,11 @@ void Camera::mouseControl(GLfloat xChange, GLfloat yChange) {
 	yaw += xChange;
 	pitch += yChange;
 
-	// Limita el pitch para evitar la inversión de la cámara
+	// Limita el pitch para evitar la inversiÃ³n de la cÃ¡mara
 	if (pitch > 89.0f) pitch = 89.0f;
 	if (pitch < -89.0f) pitch = -89.0f;
 
-	update();  // Actualiza la dirección de la cámara	
+	update();  // Actualiza la direcciÃ³n de la cÃ¡mara	
 }
 
 void Camera::dragControl(GLfloat xChange, GLfloat yChange, GLfloat deltaTime)
