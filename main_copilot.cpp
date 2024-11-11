@@ -770,7 +770,7 @@ int main(void) {
                 gameObject->EditorTools(!EditorMode);
                 posisArreglo++;
             }
-            posisArreglo = 0;
+            posisArreglo = -1;
         }
 
         EndOfFrame(window.selfWindow);
