@@ -481,7 +481,7 @@ int main(void) {
 
     GameObject* morgana = new GameObject((char*)"Morgana");
     gameObjects.push_back(morgana);
-    morgana->CreateMesh("Assets/Models/Fernando/morgana.glb");
+    morgana->CreateMesh("Assets/Models/Fernando/morgana.obj");
 
     GameObject* diana = new GameObject((char*)"diana");
     gameObjects.push_back(diana);
@@ -505,7 +505,7 @@ int main(void) {
 
     GameObject* baronN = new GameObject((char*)"Baron Nashor");
     gameObjects.push_back(baronN);
-    akshan->CreateMesh("Assets/Models/Fernando/baron.glb");
+    akshan->CreateMesh("Assets/Models/Fernando/baron.obj");
 
     GameObject* pWorld = new GameObject((char*)"Pokemon World");
     gameObjects.push_back(pWorld);
@@ -586,7 +586,11 @@ int main(void) {
     GameObject* prison = new GameObject((char*)"prision");
     gameObjects.push_back(prison);
     prison->CreateMesh("Assets/Models/Oscar/prision.obj");
-
+    
+    GameObject* zoe = new GameObject((char*)"Zoe");
+    gameObjects.push_back(zoe);
+    zoe->CreateMesh("Assets/Models/Fernando/zoe.obj");
+    zoe->SetScale(glm::vec3(0.1f, 0.1f, 0.1f));
 
     if (filesystem::exists("./Assets/scene.json"))
     {
@@ -601,12 +605,7 @@ int main(void) {
         aurora->CreateMesh("Assets/Models/Aurora/aurora.obj");*/
     }
     
-	GameObject* zoe = new GameObject((char*)"Zoe");
-	zoe->CreateMesh("Assets/Models/zoe/zoe.obj");
-	zoe->SetScale(glm::vec3(0.1f, 0.1f, 0.1f));
-
     CreateSkybox();
-
 
     float dirLightColor[] = { 1.0f, 1.0f, 1.0f };
     float dirLightAmbientIntensity = 0.5f;
@@ -702,56 +701,25 @@ int main(void) {
         glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
         glUniform3fv(uniformColor, 1, glm::value_ptr(color));
 
-        /*
-        meshList[0]->RenderMesh();
-        */
-
-		//model = glm::mat4(1.0f);
-		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(zoe->GetModelMatrix()));
-		zoe->Render();
-		zoe->EditorTools(!EditorMode);
-
-		// Renderizaci�n de la animaci�n
-        /*
-        if (aurora->HasAnimation()) {
-            aurora->Animate(deltaTime);
-            glUniformMatrix4fv(boneTransformsLoc, aurora->GetBoneTransforms().size(), GL_FALSE, glm::value_ptr(aurora->GetBoneTransforms()[0]));
-        }
-        */
-
-
         if (!gameObjects.empty())
         {
             for (auto& gameObject : gameObjects)
             {
                 // Actualizar la matriz de modelo en el shader
                 glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(gameObject->GetModelMatrix()));
-
                 //gameObjects.push_back(gameObject);
-
+                
                 // Renderizar el objeto
                 gameObject->Render();
-
+                
                 // Herramientas de ediciï¿½n (pasando el modo de ediciï¿½n como parï¿½metro)
-                    gameObject->EditorTools(!EditorMode);
-
-                /*if (gameObject->HasAnimation()) {
-                    gameObject->Animate(deltaTime);
-                    glUniformMatrix4fv(boneTransformsLoc, gameObject->GetBoneTransforms().size(), GL_FALSE, glm::value_ptr(gameObject->GetBoneTransforms()[0]));
-                }*/
+                gameObject->EditorTools(!EditorMode);
             }
         }
 
-
-        /*
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(tablero->GetModelMatrix()));
-
-        tablero->Render();
-        tablero->EditorTools(!EditorMode);
-        */
         EndOfFrame(window.selfWindow);
     }
-    //aurora->Serialize();
+
     ExitCleanup();
     return 0;
 }

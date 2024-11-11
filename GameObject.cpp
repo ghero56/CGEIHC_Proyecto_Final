@@ -60,14 +60,14 @@ GameObject::GameObject() :
 void GameObject::SetPosition(const glm::vec3& newPosition) {
     position = newPosition;
     // Actualiza la matriz de modelo cuando la posiciï¿½n cambia
-    model = glm::translate(glm::mat4(1.0f), position) * glm::mat4_cast(glm::quat(rotation)) * glm::scale(glm::mat4(1.0f), scale);
+    model = glm::translate(glm::mat4(1.0f), position) * glm::mat4_cast(glm::quat(glm::radians(rotation))) * glm::scale(glm::mat4(1.0f), scale);
     // model = glm::translate(model, position);
 }
 
 void GameObject::SetRotation(const glm::vec3& newRotation) {
     rotation = newRotation;
     // Actualiza la matriz de modelo cuando la rotaciï¿½n cambia
-    model = glm::translate(glm::mat4(1.0f), position) * glm::mat4_cast(glm::quat(rotation)) * glm::scale(glm::mat4(1.0f), scale);
+    model = glm::translate(glm::mat4(1.0f), position) * glm::mat4_cast(glm::quat(glm::radians(rotation))) * glm::scale(glm::mat4(1.0f), scale);
 }
 
 glm::vec3 GameObject::GetRotation() const {
@@ -393,6 +393,13 @@ void GameObject::EditorTools(bool hide){
 	float localy = position.y;
 	float localz = position.z;
 
+	/*
+    
+    float localrx = rotation.x;
+	float localry = rotation.y;
+	float localrz = rotation.z;
+    */
+
 	ImGui::Begin(this->name);
 
     /* Debugs
@@ -414,6 +421,8 @@ void GameObject::EditorTools(bool hide){
 	ImGui::SliderFloat("Rotation X", &rotation.x, -180.0f, 180.0f);
 	ImGui::SliderFloat("Rotation Y", &rotation.y, -180.0f, 180.0f);
 	ImGui::SliderFloat("Rotation Z", &rotation.z, -180.0f, 180.0f);
+
+	//SetRotation(glm::vec3(localrx * toRadians, localry * toRadians, localrz * toRadians));
 
     // la escala NO PUEDE ser 0
 	ImGui::Text("Scale");
