@@ -78,9 +78,68 @@ unsigned int pointLightCount = 0;
 
 // para la creación del nuevo objeto en el editor
 static char name[20] = "";
+
+// para serialización correcta
 int posis = 0;
 
+// Animación
+int casillaActiva, valorDados,contadorVector;
+float movementY, rotaY;
+bool sube, rota;
+GLfloat timerSpin;
+
+
 // ------------------- Funciones ------------------- //
+void AnimarCasilla() {
+    
+    if (!rota) {
+        if (sube) {
+            if (movementY < 0.9f) {
+                movementY += (0.025f * 5.0f) * deltaTime;
+                rotaY += (0.025f * 5.0f) * deltaTime;
+            }
+            else {
+                sube = !sube;
+                rota = !rota;
+                timerSpin = glfwGetTime();
+            }
+        }
+        else {
+            if (movementY > -1.0f) {
+                movementY -= (0.025f * 5.0f) * deltaTime;
+                rotaY = 0.0f;
+            }
+            else {
+                sube = !sube;
+                timerSpin = glfwGetTime();
+            }
+        }
+    }
+    else {
+        rotaY = 0.0;
+        movementY = 0.9f;
+        if (glfwGetTime() > timerSpin + 3.0f) {
+            rota = !rota;
+        }
+    }
+
+
+}
+
+void inputKeyframes(bool* keys)
+{
+    if (keys[GLFW_KEY_ENTER])
+    {
+        if (casillaActiva < 41) {
+            casillaActiva += 1;
+        }
+        else {
+            casillaActiva = 1;
+        }
+    }
+}
+
+
 void NewFrame() {
     GLfloat now = glfwGetTime();
     deltaTime = now - lastTime;
@@ -541,14 +600,6 @@ int main(void) {
     if (filesystem::exists("./Assets/scene.json"))
     {
         Decode();
-        // Crear y configurar el GameObject
-        /*GameObject* tablero = new GameObject((char*)"Tablero");
-        gameObjects.push_back(tablero);
-        tablero->CreateMesh("Assets/Models/Tablero/tablero.obj");
-
-        GameObject* aurora = new GameObject((char*)"Aurora");
-        gameObjects.push_back(aurora);
-        aurora->CreateMesh("Assets/Models/Aurora/aurora.obj");*/
     }
 
     
@@ -587,6 +638,13 @@ int main(void) {
 	glfwGetTime();
 	glfwSetTime(0.0);
 
+    casillaActiva = 1;
+    valorDados=0;
+    movementY=0;
+    rotaY=0;
+    sube=true; 
+    rota=false;
+
     while (!glfwWindowShouldClose(window.selfWindow)) {
         
         NewFrame();
@@ -601,6 +659,12 @@ int main(void) {
         uniformView = shaderList[0].GetViewLocation();
         uniformEyePosition = shaderList[0].GetEyePositionLocation();
         uniformColor = shaderList[0].getColorLocation();
+
+        //Manejo de animaciones
+        GLfloat now = glfwGetTime();
+        deltaTime = now - lastTime;
+        deltaTime += (now - lastTime) / limitFPS;
+        lastTime = now;
 
         //información en el shader de intensidad especular y brillo
         uniformSpecularIntensity = shaderList[0].GetSpecularIntensityLocation();
@@ -646,13 +710,38 @@ int main(void) {
         }
         */
 
+        
 
+            
+        printf("%f\n", movementY);
         if (!gameObjects.empty())
         {
             for (auto& gameObject : gameObjects)
             {
-                // Actualizar la matriz de modelo en el shader
-                glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(gameObject->GetModelMatrix()));
+                if (contadorVector == casillaActiva) {
+                    glm::vec3 movement = gameObject->GetPosition();
+                    glm::vec3 rotation = gameObject->GetRotation();
+                   
+                    if (movementY < 0.9 && sube) {
+                        movement.y += movementY;
+                        rotation.y += rotaY;
+                    }
+                    else {
+                        if (movementY > -1.0 && !sube) {
+                            movement.y -= movementY;
+                        }
+                    }
+                    gameObject->SetPosition(movement);
+                    gameObject->SetRotation(rotation);
+
+                    glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(gameObject->GetModelMatrix()));
+
+                }
+                else {
+                    // Actualizar la matriz de modelo en el shader
+                    glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(gameObject->GetModelMatrix()));
+                }
+
 
                 //gameObjects.push_back(gameObject);
 
@@ -660,13 +749,15 @@ int main(void) {
                 gameObject->Render();
 
                 // Herramientas de ediciï¿½n (pasando el modo de ediciï¿½n como parï¿½metro)
-                    gameObject->EditorTools(!EditorMode);
+                gameObject->EditorTools(!EditorMode);
 
                 /*if (gameObject->HasAnimation()) {
                     gameObject->Animate(deltaTime);
                     glUniformMatrix4fv(boneTransformsLoc, gameObject->GetBoneTransforms().size(), GL_FALSE, glm::value_ptr(gameObject->GetBoneTransforms()[0]));
                 }*/
+                    contadorVector++;
             }
+            contadorVector = 0;
         }
 
 
@@ -676,6 +767,9 @@ int main(void) {
         tablero->Render();
         tablero->EditorTools(!EditorMode);
         */
+
+        //AnimarCasilla();
+
         EndOfFrame(window.selfWindow);
     }
     //aurora->Serialize();
