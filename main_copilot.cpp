@@ -82,12 +82,12 @@ static char name[20] = "";
 // para serialización correcta
 int posis = 0;
 
-// Animación
-int casillaActiva, valorDados,contadorVector;
-float movementY, rotaY;
-bool sube, rota;
-GLfloat timerSpin;
-
+// para la animación
+int casilla;
+int posisArreglo=0;
+bool vertical = true;
+bool girar = false;
+GLfloat tiempo;
 
 // ------------------- Funciones ------------------- //
 void AnimarCasilla() {
@@ -638,12 +638,10 @@ int main(void) {
 	glfwGetTime();
 	glfwSetTime(0.0);
 
-    casillaActiva = 1;
-    valorDados=0;
-    movementY=0;
-    rotaY=0;
-    sube=true; 
-    rota=false;
+    GLfloat now = glfwGetTime();
+    deltaTime = now - lastTime;
+    deltaTime += (now - lastTime) / limitFPS;
+    lastTime = now;
 
     while (!glfwWindowShouldClose(window.selfWindow)) {
         
@@ -718,31 +716,50 @@ int main(void) {
         {
             for (auto& gameObject : gameObjects)
             {
-                if (contadorVector == casillaActiva) {
+
+                if (posisArreglo==casilla)
+                {
                     glm::vec3 movement = gameObject->GetPosition();
                     glm::vec3 rotation = gameObject->GetRotation();
-                   
-                    if (movementY < 0.9 && sube) {
-                        movement.y += movementY;
-                        rotation.y += rotaY;
-                    }
-                    else {
-                        if (movementY > -1.0 && !sube) {
-                            movement.y -= movementY;
+
+                    if (!girar) {
+                        if (vertical) {
+                            if (movement.y < 30.0f) {
+                                movement.y += 0.3f;
+                            }
+                            else {
+                                vertical = !vertical;
+                                tiempo = glfwGetTime();
+                            }
+                        }
+                        else {
+                            if (glfwGetTime() > tiempo + 3.0f) {
+                                girar = !girar;
+                            }
+                            else {
+                                rotation.y += 5.0f;
+                            }
                         }
                     }
+                    else {
+                        if (movement.y > -30.0f) {
+                            movement.y -= 0.3f;
+                            rotation.y = 0;
+                        }
+                        else {
+                            casilla=-1;
+                        }
+                    }
+
+                    
                     gameObject->SetPosition(movement);
                     gameObject->SetRotation(rotation);
 
-                    glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(gameObject->GetModelMatrix()));
-
-                }
-                else {
-                    // Actualizar la matriz de modelo en el shader
-                    glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(gameObject->GetModelMatrix()));
+                    
                 }
 
-
+                // Actualizar la matriz de modelo en el shader
+                glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(gameObject->GetModelMatrix()));
                 //gameObjects.push_back(gameObject);
 
                 // Renderizar el objeto
@@ -750,14 +767,9 @@ int main(void) {
 
                 // Herramientas de ediciï¿½n (pasando el modo de ediciï¿½n como parï¿½metro)
                 gameObject->EditorTools(!EditorMode);
-
-                /*if (gameObject->HasAnimation()) {
-                    gameObject->Animate(deltaTime);
-                    glUniformMatrix4fv(boneTransformsLoc, gameObject->GetBoneTransforms().size(), GL_FALSE, glm::value_ptr(gameObject->GetBoneTransforms()[0]));
-                }*/
-                    contadorVector++;
+                posisArreglo++;
             }
-            contadorVector = 0;
+            posisArreglo = 0;
         }
 
 
