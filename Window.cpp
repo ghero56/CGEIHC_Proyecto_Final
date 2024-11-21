@@ -11,6 +11,11 @@ Window::Window() {
 int Window::Initialize(int rx, int ry) {
 	width = rx;
 	height = ry;
+	movimiento = 1;
+	dado1 = 0;
+	dado2 = 0;
+	ajusteRot = 0;
+	tirando = false;
 	if (!glfwInit())
 	{
 		cout << "Fallo en inicializar GLFW" << endl;
@@ -85,6 +90,25 @@ void Window::keyCallback(GLFWwindow* window, int key, int scancode, int action, 
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 	{
 		glfwSetWindowShouldClose(window, GL_TRUE);
+	}
+
+	if (key == GLFW_KEY_Y && action == GLFW_RELEASE)
+	{
+		if (theWindow->tirando == false)
+		{
+			theWindow->tirando = true;
+			theWindow->dado1 = 1 + std::rand() % 4;
+			theWindow->dado2 = 1 + std::rand() % 8;
+			theWindow->movimiento += theWindow->dado1 + theWindow->dado2;
+			std::cout << "Dado 1: " << theWindow->dado1 << std::endl;
+			std::cout << "Dado 2: " << theWindow->dado2 << std::endl;
+			std::cout << "Estado: " << theWindow->tirando << std::endl;
+			if (theWindow->movimiento > 40)
+			{
+				theWindow->movimiento -= 40;
+				theWindow->ajusteRot += 360;
+			}
+		}
 	}
 
 	if (key >= 0 && key < 1024)

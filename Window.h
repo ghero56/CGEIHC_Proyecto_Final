@@ -33,6 +33,14 @@ public:
 	void SetBufferWidth(int width) { bufferWidth = width; }
 	void SetBufferHeight(int height) { bufferHeight = height; }
 
+	int getMovimiento() { return movimiento; }
+	int getDado1() { return dado1; }
+	int getDado2() { return dado2; }
+	int getAjusteRot() { return ajusteRot; }
+	bool getTirando() { return tirando; }
+
+	void setTirando(bool estado) { tirando = estado; }
+
 	void SetWindow(GLFWwindow* window) { selfWindow = window; }
 
 	bool* GetKeys() { return keys; }
@@ -46,6 +54,9 @@ private:
 	int bufferWidth, bufferHeight;    
 	int width, height;
 	int key, key_action, key_mods, key_scancode;
+
+	int movimiento, dado1, dado2, ajusteRot;
+	bool tirando;
 
 	double mouse_x, mouse_y, scroll_y;
 	double lastX, lastY;

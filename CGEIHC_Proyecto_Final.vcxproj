@@ -161,7 +161,6 @@ xcopy /y /d "lib\assimp\*.dll" "$(OutDir)"
     <ClCompile Include="include\imgui\imgui_tables.cpp" />
     <ClCompile Include="include\imgui\imgui_widgets.cpp" />
     <ClCompile Include="Light.cpp" />
-    <ClCompile Include="main_copilot.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="PointLight.cpp" />
     <ClCompile Include="Shader.cpp" />
@@ -169,6 +168,7 @@ xcopy /y /d "lib\assimp\*.dll" "$(OutDir)"
     <ClCompile Include="SpotLight.cpp" />
     <ClCompile Include="stb_image.cpp" />
     <ClCompile Include="Texture.cpp" />
+    <ClCompile Include="ultimateMain.cpp" />
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <ItemGroup>
