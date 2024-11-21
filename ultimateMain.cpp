@@ -921,10 +921,6 @@ int main(void) {
     gameObjects.push_back(prison);
     prison->CreateMesh("Assets/Models/Oscar/prision.obj");
     
-    GameObject* zoe = new GameObject((char*)"Zoe");
-    gameObjects.push_back(zoe);
-    zoe->CreateMesh("Assets/Models/Fernando/zoe.obj");
-    zoe->SetScale(glm::vec3(0.1f, 0.1f, 0.1f));
 
     GameObject* ash = new GameObject((char*)"Ash");
     ash->CreateMesh("Assets/Models/Ash/Ash_Ketchum.obj");
@@ -1077,7 +1073,7 @@ int main(void) {
 		directionalLight->SetDirection(glm::vec3(dirLightDirection[0], dirLightDirection[1], dirLightDirection[2]));
         shaderList[0].SetDirectionalLight(directionalLight);
 
-		pointLights[0].SetPosition(zoe->GetPosition() + glm::vec3(.0f,4.0f,0.f));
+		pointLights[0].SetPosition(ash->GetPosition() + glm::vec3(.0f,4.0f,0.f));
         shaderList[0].SetPointLights(pointLights, pointLightCount);
         shaderList[0].SetSpotLights(spotLights, spotLightCount);
         
