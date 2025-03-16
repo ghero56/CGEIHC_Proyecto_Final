@@ -44,7 +44,7 @@
 
 // serialización
 #include <json.hpp>
-#include<fstream>
+#include <fstream>
 
 #include "SceneManager.h"
 
@@ -784,186 +784,9 @@ int main(void) {
     gameObjects.push_back(tablero);
     tablero->CreateMesh("Assets/Models/Tablero/tablero.obj");
 
-    GameObject* templo2 = new GameObject((char*)"templo2");
-    gameObjects.push_back(templo2);
-    templo2->CreateMesh("Assets/Models/Oscar/templo_aire_2.fbx");
-
-    GameObject* pLeague = new GameObject((char*)"Pokemon League");
-    gameObjects.push_back(pLeague);
-    pLeague->CreateMesh("Assets/Models/Omar/Pokémon League.obj");
-
-    GameObject* mesa_pai_sho = new GameObject((char*)"mesa_pai_sho");
-    gameObjects.push_back(mesa_pai_sho);
-    mesa_pai_sho->CreateMesh("Assets/Models/Oscar/mesa_pai_sho.obj");
-
-    GameObject* pMansion = new GameObject((char*)"Pokemon Mansion");
-    gameObjects.push_back(pMansion);
-    pMansion->CreateMesh("Assets/Models/Omar/Pokemon Mansion.obj");
-
-    GameObject* appa = new GameObject((char*)"Appa");
-    gameObjects.push_back(appa);
-    appa->CreateMesh("Assets/Models/Oscar/appa.fbx");
-
-    GameObject* pArena = new GameObject((char*)"Pokemon Arena");
-    gameObjects.push_back(pArena);
-    pArena->CreateMesh("Assets/Models/Omar/Mineways2Skfb.obj");
-
-
-    GameObject* yumi = new GameObject((char*)"Yumi edg");
-    gameObjects.push_back(yumi);
-    yumi->CreateMesh("Assets/Models/Fernando/edg_yuumi.glb");
-
     GameObject* morgana = new GameObject((char*)"Morgana");
     gameObjects.push_back(morgana);
     morgana->CreateMesh("Assets/Models/Fernando/morgana.obj");
-
-    GameObject* diana = new GameObject((char*)"diana");
-    gameObjects.push_back(diana);
-    diana->CreateMesh("Assets/Models/Fernando/winterblessed_diana.glb");
-
-    GameObject* dragonE = new GameObject((char*)"Dragon Elder");
-    gameObjects.push_back(dragonE);
-    dragonE->CreateMesh("Assets/Models/Fernando/dragon_(elder).glb");
-
-    GameObject* gromp = new GameObject((char*)"Gromp");
-    gameObjects.push_back(gromp);
-    gromp->CreateMesh("Assets/Models/Fernando/gromp.glb");
-
-    GameObject* akshan = new GameObject((char*)"Akshan");
-    gameObjects.push_back(akshan);
-    akshan->CreateMesh("Assets/Models/Fernando/cyber_pop_akshan.glb");
-
-    GameObject* maestroJ = new GameObject((char*)"Maestro Jhin");
-    gameObjects.push_back(maestroJ);
-    akshan->CreateMesh("Assets/Models/Fernando/maestro_jhin.glb");
-
-    GameObject* baronN = new GameObject((char*)"Baron Nashor");
-    gameObjects.push_back(baronN);
-    akshan->CreateMesh("Assets/Models/Fernando/baron.obj");
-
-    GameObject* pWorld = new GameObject((char*)"Pokemon World");
-    gameObjects.push_back(pWorld);
-    pWorld->CreateMesh("Assets/Models/Omar/Pokeball Place.fbx");
-
-    GameObject* pHouse = new GameObject((char*)"Pokemon House");
-    gameObjects.push_back(pHouse);
-    pHouse->CreateMesh("Assets/Models/Omar/pokehouse1.fbx");
-
-    GameObject* submarine = new GameObject((char*)"Aqua Submarine");
-    gameObjects.push_back(submarine);
-    submarine->CreateMesh("Assets/Models/Omar/submarine.obj");
-
-    GameObject* healer = new GameObject((char*)"Pokemon Healer");
-    gameObjects.push_back(healer);
-    healer->CreateMesh("Assets/Models/Omar/healer.obj");
-
-    GameObject* movil = new GameObject((char*)"PokeMovile");
-    gameObjects.push_back(movil);
-    movil->CreateMesh("Assets/Models/Omar/Van21.fbx");
-
-    GameObject* regi = new GameObject((char*)"Regirock");
-    gameObjects.push_back(regi);
-    regi->CreateMesh("Assets/Models/Omar/Regirock_marmoset.fbx");
-
-    GameObject* pMan2 = new GameObject((char*)"Pokemon Mansion 2");
-    gameObjects.push_back(pMan2);
-    pMan2->CreateMesh("Assets/Models/Omar/Pokemon League.obj");
-
-    GameObject* pCenter = new GameObject((char*)"Pokemon Center");
-    gameObjects.push_back(pCenter);
-    pCenter->CreateMesh("Assets/Models/Omar/Pokemon_Center.obj");
-
-    GameObject* pikoM = new GameObject((char*)"Pikomat");
-    gameObjects.push_back(pikoM);
-    pikoM->CreateMesh("Assets/Models/Omar/Model_1.fbx");
-
-    GameObject* groudon = new GameObject((char*)"Groudon");
-    gameObjects.push_back(groudon);
-    groudon->CreateMesh("Assets/Models/Omar/Groudon.fbx");
-
-    GameObject* dragon = new GameObject((char*)"dragon");
-    gameObjects.push_back(dragon);
-    dragon->CreateMesh("Assets/Models/Oscar/dragon.fbx");
-
-    GameObject* glider = new GameObject((char*)"glider");
-    gameObjects.push_back(glider);
-    glider->CreateMesh("Assets/Models/Oscar/glider.fbx");
-
-    GameObject* ba_sin_se = new GameObject((char*)"ba_sin_se");
-    gameObjects.push_back(ba_sin_se);
-    ba_sin_se->CreateMesh("Assets/Models/Oscar/ba_sin_se.obj");
-
-    GameObject* tribuA = new GameObject((char*)"tribuA");
-    gameObjects.push_back(tribuA);
-    tribuA->CreateMesh("Assets/Models/Oscar/tribu_agua.obj");
-
-    GameObject* templo1 = new GameObject((char*)"templo1");
-    gameObjects.push_back(templo1);
-    templo1->CreateMesh("Assets/Models/Oscar/templo_aire_1.obj");
-
-    GameObject* tetera = new GameObject((char*)"tetera");
-    gameObjects.push_back(tetera);
-    tetera->CreateMesh("Assets/Models/Oscar/tetera_iroh.fbx");
-
-    GameObject* carro_coles = new GameObject((char*)"carro_coles");
-    gameObjects.push_back(carro_coles);
-    carro_coles->CreateMesh("Assets/Models/Oscar/carro_coles.fbx");
-
-    GameObject* soldado = new GameObject((char*)"soldado");
-    gameObjects.push_back(soldado);
-    soldado->CreateMesh("Assets/Models/Oscar/soldado_nf.obj");
-
-    GameObject* momo = new GameObject((char*)"momo");
-    gameObjects.push_back(momo);
-    momo->CreateMesh("Assets/Models/Oscar/momo.fbx");
-
-    GameObject* prison = new GameObject((char*)"prision");
-    gameObjects.push_back(prison);
-    prison->CreateMesh("Assets/Models/Oscar/prision.obj");
-    
-
-    GameObject* ash = new GameObject((char*)"Ash");
-    ash->CreateMesh("Assets/Models/Ash/Ash_Ketchum.obj");
-    ash->SetScale(glm::vec3(5.0f,5.0f,5.0f));
-
-    GameObject* dado1 = new GameObject((char*)"Dado1");
-    dado1->CreateMesh("Assets/Models/Dados/dado1.obj");
-
-    GameObject* dado1_2 = new GameObject((char*)"Dado1_2");
-    dado1_2->CreateMesh("Assets/Models/Dados/dado1_2.obj");
-
-    GameObject* dado1_3 = new GameObject((char*)"Dado1_3");
-    dado1_3->CreateMesh("Assets/Models/Dados/dado1_3.obj");
-
-    GameObject* dado1_4 = new GameObject((char*)"Dado1_4");
-    dado1_4->CreateMesh("Assets/Models/Dados/dado1_4.obj");
-
-    GameObject* dado2 = new GameObject((char*)"Dado2");
-    dado2->CreateMesh("Assets/Models/Dados/dado2.obj");
-
-    GameObject* dado2_1 = new GameObject((char*)"Dado2_1");
-    dado2_1->CreateMesh("Assets/Models/Dados/dado2_1.obj");
-
-    GameObject* dado2_2 = new GameObject((char*)"Dado2_2");
-    dado2_2->CreateMesh("Assets/Models/Dados/dado2_2.obj");
-
-    GameObject* dado2_3 = new GameObject((char*)"Dado2_3");
-    dado2_3->CreateMesh("Assets/Models/Dados/dado2_3.obj");
-
-    GameObject* dado2_4 = new GameObject((char*)"Dado2_4");
-    dado2_4->CreateMesh("Assets/Models/Dados/dado2_4.obj");
-
-    GameObject* dado2_5 = new GameObject((char*)"Dado2_5");
-    dado2_5->CreateMesh("Assets/Models/Dados/dado2_5.obj");
-
-    GameObject* dado2_6 = new GameObject((char*)"Dado2_6");
-    dado2_6->CreateMesh("Assets/Models/Dados/dado2_6.obj");
-
-    GameObject* dado2_7 = new GameObject((char*)"Dado2_7");
-    dado2_7->CreateMesh("Assets/Models/Dados/dado2_7.obj");
-
-    GameObject* dado2_8 = new GameObject((char*)"Dado2_8");
-    dado2_8->CreateMesh("Assets/Models/Dados/dado2_8.obj");
 
     if (filesystem::exists("./Assets/scene.json"))
     {
@@ -991,8 +814,8 @@ int main(void) {
     glm::mat4 model(1.0);
     glm::mat4 modelAsh(1.0);
     glm::vec3 color = glm::vec3(1.0f, 1.0f, 1.0f);
-    glm::vec3 posAsh = ash->GetPosition();
-    glm::vec3 rotAsh = ash->GetRotation();
+    glm::vec3 posAsh = morgana->GetPosition();
+    glm::vec3 rotAsh = morgana->GetRotation();
 
     GLfloat now = glfwGetTime();
     deltaTime = now - lastTime;
@@ -1036,8 +859,8 @@ int main(void) {
             camera.SetPitch(0.0f);
 			camera.calculateViewMatrix();
         } else if (GameMode) {
-			camera.SetPosition(ash->GetPosition() + ash->GetCameraOffset()); 
-			camera.SetFront(ash->GetObjectFront());
+			camera.SetPosition(morgana->GetPosition() + morgana->GetCameraOffset()); 
+			camera.SetFront(morgana->GetObjectFront());
             camera.SetYaw(0.0f);
             camera.SetPitch(-90.0f);
             camera.SetUp(glm::vec3(0.0f, 1.0f, 0.0f));
@@ -1073,7 +896,7 @@ int main(void) {
 		directionalLight->SetDirection(glm::vec3(dirLightDirection[0], dirLightDirection[1], dirLightDirection[2]));
         shaderList[0].SetDirectionalLight(directionalLight);
 
-		pointLights[0].SetPosition(ash->GetPosition() + glm::vec3(.0f,4.0f,0.f));
+		pointLights[0].SetPosition(morgana->GetPosition() + glm::vec3(.0f,4.0f,0.f));
         shaderList[0].SetPointLights(pointLights, pointLightCount);
         shaderList[0].SetSpotLights(spotLights, spotLightCount);
         
@@ -1117,12 +940,8 @@ int main(void) {
                             casilla = -1;
                         }
                     }
-
-                    
                     gameObject->SetPosition(movement);
                     gameObject->SetRotation(rotation);
-
-                    
                 }
 
                 // Actualizar la matriz de modelo en el shader
@@ -1147,112 +966,11 @@ int main(void) {
         //casilla = casillaAct;
         ManejoDados();
 
-        ash->SetPosition(glm::vec3(posAsh.x + movAshX, posAsh.y, posAsh.z + movAshZ));
-        ash->SetRotation(glm::vec3(rotAsh.x, rotAsh.y + rotAshY, rotAsh.z));
-        glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(ash->GetModelMatrix()));
-        ash->Render();
-        ash->EditorTools(!EditorMode);
-
-        if (window.getDado1() == 1)
-        {
-            dado1->SetPosition(glm::vec3(-15.0f, movDado1Y, 0.0f));
-            dado1->SetRotation(glm::vec3(0.0f, rotDado1Y, 0.0f));
-            glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(dado1->GetModelMatrix()));
-            dado1->Render();
-            //dado1->EditorTools(!EditorMode);
-        }
-        else if (window.getDado1() == 2)
-        {
-            dado1_2->SetPosition(glm::vec3(-15.0f, movDado1Y, 0.0f));
-            dado1_2->SetRotation(glm::vec3(0.0f, rotDado1Y, 0.0f));
-            glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(dado1_2->GetModelMatrix()));
-            dado1_2->Render();
-        }
-        else if (window.getDado1() == 3)
-        {
-            dado1_3->SetPosition(glm::vec3(-15.0f, movDado1Y, 0.0f));
-            dado1_3->SetRotation(glm::vec3(0.0f, rotDado1Y, 0.0f));
-            glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(dado1_3->GetModelMatrix()));
-            dado1_3->Render();
-        }
-        else if (window.getDado1() == 4)
-        {
-            dado1_4->SetPosition(glm::vec3(-15.0f, movDado1Y, 0.0f));
-            dado1_4->SetRotation(glm::vec3(0.0f, rotDado1Y, 0.0f));
-            glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(dado1_4->GetModelMatrix()));
-            dado1_4->Render();
-        }
-        else
-        {
-            dado1->SetPosition(glm::vec3(-15.0f, movDado1Y, 0.0f));
-            dado1->SetRotation(glm::vec3(0.0f, rotDado1Y, 0.0f));
-            glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(dado1->GetModelMatrix()));
-            dado1->Render();
-        }
-
-        if (window.getDado2() == 1)
-        {
-            dado2_1->SetPosition(glm::vec3(15.0f, movDado2Y, 0.0f));
-            dado2_1->SetRotation(glm::vec3(0.0f, rotDado2Y, 0.0f));
-            glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(dado2_1->GetModelMatrix()));
-            dado2_1->Render();
-        }
-        else if (window.getDado2() == 2)
-        {
-            dado2_2->SetPosition(glm::vec3(15.0f, movDado2Y, 0.0f));
-            dado2_2->SetRotation(glm::vec3(0.0f, rotDado2Y, 0.0f));
-            glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(dado2_2->GetModelMatrix()));
-            dado2_2->Render();
-        }
-        else if (window.getDado2() == 3)
-        {
-            dado2_3->SetPosition(glm::vec3(15.0f, movDado2Y, 0.0f));
-            dado2_3->SetRotation(glm::vec3(0.0f, rotDado2Y, 0.0f));
-            glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(dado2_3->GetModelMatrix()));
-            dado2_3->Render();
-        }
-        else if (window.getDado2() == 4)
-        {
-            dado2_4->SetPosition(glm::vec3(15.0f, movDado2Y, 0.0f));
-            dado2_4->SetRotation(glm::vec3(0.0f, rotDado2Y, 0.0f));
-            glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(dado2_4->GetModelMatrix()));
-            dado2_4->Render();
-        }
-        else if (window.getDado2() == 5)
-        {
-            dado2_5->SetPosition(glm::vec3(15.0f, movDado2Y, 0.0f));
-            dado2_5->SetRotation(glm::vec3(0.0f, rotDado2Y, 0.0f));
-            glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(dado2_5->GetModelMatrix()));
-            dado2_5->Render();
-        }
-        else if (window.getDado2() == 6)
-        {
-            dado2_6->SetPosition(glm::vec3(15.0f, movDado2Y, 0.0f));
-            dado2_6->SetRotation(glm::vec3(0.0f, rotDado2Y, 0.0f));
-            glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(dado2_6->GetModelMatrix()));
-            dado2_6->Render();
-        }
-        else if (window.getDado2() == 7)
-        {
-            dado2_7->SetPosition(glm::vec3(15.0f, movDado2Y, 0.0f));
-            dado2_7->SetRotation(glm::vec3(0.0f, rotDado2Y, 0.0f));
-            glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(dado2_7->GetModelMatrix()));
-            dado2_7->Render();
-        }
-        else if (window.getDado2() == 8)
-        {
-            dado2_8->SetPosition(glm::vec3(15.0f, movDado2Y, 0.0f));
-            dado2_8->SetRotation(glm::vec3(0.0f, rotDado2Y, 0.0f));
-            glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(dado2_8->GetModelMatrix()));
-            dado2_8->Render();
-        }
-        else
-        {
-            dado2->SetPosition(glm::vec3(15.0f, movDado2Y, 0.0f));
-            dado2->SetRotation(glm::vec3(0.0f, rotDado2Y, 0.0f));
-            glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(dado2->GetModelMatrix()));
-            dado2->Render();
-        }
+        morgana->SetPosition(glm::vec3(posAsh.x + movAshX, posAsh.y, posAsh.z + movAshZ));
+        morgana->SetRotation(glm::vec3(rotAsh.x, rotAsh.y + rotAshY, rotAsh.z));
+        glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(morgana->GetModelMatrix()));
+        morgana->Render();
+        morgana->EditorTools(!EditorMode);
 
         EndOfFrame(window.selfWindow);
     }
